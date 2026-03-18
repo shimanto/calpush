@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CalPush セットアップウィザード（デモ）</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; color: #1e293b; line-height: 1.7; background: #f8fafc; }
+
+    /* Header */
+    .header { position: fixed; top: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; z-index: 100; }
+    .header-inner { max-width: 720px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .header-title { font-size: 18px; font-weight: 700; color: #1e293b; }
+    .header-title span { color: #4f46e5; }
+    .header-back { text-decoration: none; color: #4f46e5; font-size: 14px; font-weight: 600; }
+    .header-back:hover { color: #4338ca; }
+
+    /* Demo banner */
+    .demo-banner { background: #fffbeb; border-bottom: 1px solid #fde68a; padding: 10px 24px; text-align: center; font-size: 13px; color: #92400e; font-weight: 600; margin-top: 53px; }
+
+    /* Main container */
+    .wizard { max-width: 600px; margin: 24px auto 60px; padding: 0 20px; }
+
+    /* Step indicators */
+    .step-indicators { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 32px; }
+    .step-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #94a3b8; background: #e2e8f0; transition: all 0.3s ease; cursor: default; flex-shrink: 0; }
+    .step-dot.active { background: #4f46e5; color: #fff; box-shadow: 0 2px 8px rgba(79,70,229,0.3); }
+    .step-dot.done { background: #059669; color: #fff; }
+    .step-line { width: 40px; height: 3px; background: #e2e8f0; transition: background 0.3s ease; }
+    .step-line.done { background: #059669; }
+
+    /* Panel */
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .panel-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .panel-desc { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+
+    /* Form */
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; transition: border-color 0.2s; }
+    .form-input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    textarea.form-input { min-height: 80px; }
+
+    /* Guide toggle */
+    .guide-toggle { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: #4f46e5; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; margin-bottom: 12px; font-family: inherit; }
+    .guide-toggle:hover { color: #4338ca; }
+    .guide-arrow { transition: transform 0.2s; display: inline-block; font-size: 10px; }
+    .guide-arrow.open { transform: rotate(90deg); }
+    .guide-content { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #475569; line-height: 1.8; margin-bottom: 16px; display: none; }
+    .guide-content.show { display: block; animation: fadeIn 0.2s ease; }
+    .guide-content a { color: #4f46e5; font-weight: 600; text-decoration: none; }
+    .guide-content a:hover { text-decoration: underline; }
+    .guide-content ol { padding-left: 20px; }
+    .guide-content li { margin-bottom: 4px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #4f46e5; color: #fff; box-shadow: 0 2px 8px rgba(79,70,229,0.25); }
+    .btn-primary:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(79,70,229,0.3); }
+    .btn-back { background: none; border: 1px solid #e2e8f0; color: #64748b; padding: 10px 18px; font-size: 14px; }
+    .btn-back:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .btn-row { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; }
+
+    /* Status messages */
+    .status { padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; margin-top: 16px; display: none; animation: fadeIn 0.3s ease; }
+    .status.show { display: flex; align-items: center; gap: 8px; }
+    .status-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+    .status-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .status-loading { background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; }
+
+    /* Spinner */
+    .spinner { width: 18px; height: 18px; border: 2px solid #c7d2fe; border-top-color: #4f46e5; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Copy box */
+    .copy-box { display: flex; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .copy-box-text { flex: 1; padding: 12px 14px; font-size: 12px; color: #475569; font-family: 'SF Mono', 'Cascadia Code', monospace; word-break: break-all; }
+    .copy-btn { padding: 12px 16px; background: #4f46e5; color: #fff; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; flex-shrink: 0; }
+    .copy-btn:hover { background: #4338ca; }
+    .copy-btn.copied { background: #059669; }
+
+    /* Check list (step 5) */
+    .check-list { list-style: none; padding: 0; margin: 20px 0; }
+    .check-list li { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    .check-list li:last-child { border-bottom: none; }
+    .check-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .check-icon.ok { background: #ecfdf5; color: #059669; }
+
+    /* Links */
+    .link-cards { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .link-card { flex: 1; min-width: 180px; text-decoration: none; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 16px; text-align: center; transition: all 0.2s; }
+    .link-card:hover { background: #e0e7ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.1); }
+    .link-card-title { font-size: 15px; font-weight: 600; color: #4f46e5; }
+    .link-card-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+    /* Completion header */
+    .completion { text-align: center; margin-bottom: 24px; }
+    .completion-emoji { font-size: 48px; margin-bottom: 12px; }
+    .completion-title { font-size: 24px; font-weight: 800; color: #059669; }
+
+    /* Webhook guide steps */
+    .webhook-steps { list-style: none; padding: 0; counter-reset: ws; }
+    .webhook-steps li { counter-increment: ws; display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #475569; }
+    .webhook-steps li:last-child { border-bottom: none; }
+    .webhook-steps li::before { content: counter(ws); width: 24px; height: 24px; border-radius: 50%; background: #eef2ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+
+    /* Step 3 feature list */
+    .feature-list { list-style: none; padding: 0; margin: 0 0 16px; }
+    .feature-list li { padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .feature-list li:last-child { border-bottom: none; }
+    .feature-bullet { color: #4f46e5; font-weight: 700; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .panel { padding: 20px 16px; }
+      .panel-title { font-size: 18px; }
+      .step-dot { width: 30px; height: 30px; font-size: 12px; }
+      .step-line { width: 24px; }
+      .btn-row { flex-direction: column-reverse; gap: 10px; }
+      .btn-row .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title"><span>CalPush</span> セットアップ</div>
+    <a href="index.html" class="header-back">&larr; トップへ</a>
+  </div>
+</header>
+
+<!-- Demo Banner -->
+<div class="demo-banner">デモモード &mdash; 実際の設定は行われません</div>
+
+<!-- Wizard -->
+<div class="wizard">
+  <!-- Step indicators -->
+  <div class="step-indicators">
+    <div class="step-dot active" id="dot-1">1</div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot" id="dot-2">2</div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-dot" id="dot-3">3</div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-dot" id="dot-4">4</div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-dot" id="dot-5">5</div>
+  </div>
+
+  <!-- Step 1: LINE Bot 接続 -->
+  <div class="panel" id="step-1">
+    <div class="panel-title">Step 1: LINE Bot 接続</div>
+    <div class="panel-desc">LINE Messaging API の Channel Access Token を入力してください。</div>
+
+    <button class="guide-toggle" onclick="toggleGuide('guide-1')">
+      <span class="guide-arrow" id="arrow-guide-1">&#9654;</span>
+      トークンの取得方法を見る
+    </button>
+    <div class="guide-content" id="guide-1">
+      <ol>
+        <li><a href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers</a> にログイン</li>
+        <li>プロバイダーを選択（または新規作成）</li>
+        <li>Messaging API チャネルを選択</li>
+        <li>「Messaging API設定」タブを開く</li>
+        <li>「チャネルアクセストークン（長期）」の「発行」をクリック</li>
+        <li>表示されたトークンをコピー</li>
+      </ol>
+    </div>
+
+    <label class="form-label">Channel Access Token</label>
+    <textarea class="form-input" id="line-token" placeholder="ここにトークンを貼り付け..."></textarea>
+
+    <div class="status" id="status-1"></div>
+
+    <div class="btn-row">
+      <div></div>
+      <button class="btn btn-primary" id="btn-test-1" onclick="testStep1()">接続テスト＆保存</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Google Calendar 接続 -->
+  <div class="panel" id="step-2" style="display:none;">
+    <div class="panel-title">Step 2: Google Calendar 接続</div>
+    <div class="panel-desc">通知対象の Google カレンダー ID を入力してください。</div>
+
+    <button class="guide-toggle" onclick="toggleGuide('guide-2')">
+      <span class="guide-arrow" id="arrow-guide-2">&#9654;</span>
+      カレンダー ID の確認方法を見る
+    </button>
+    <div class="guide-content" id="guide-2">
+      <ol>
+        <li><a href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener">Google カレンダー設定</a> を開く</li>
+        <li>左メニューから対象のカレンダーを選択</li>
+        <li>「カレンダーの統合」セクションまでスクロール</li>
+        <li>「カレンダー ID」をコピー（例: example@gmail.com）</li>
+      </ol>
+    </div>
+
+    <label class="form-label">Calendar ID</label>
+    <input type="text" class="form-input" id="calendar-id" placeholder="your-email@gmail.com">
+
+    <div class="status" id="status-2"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goToStep(1)">&larr; 戻る</button>
+      <button class="btn btn-primary" id="btn-test-2" onclick="testStep2()">接続テスト＆保存</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 自動通知を有効化 -->
+  <div class="panel" id="step-3" style="display:none;">
+    <div class="panel-title">Step 3: 自動通知を有効化</div>
+    <div class="panel-desc">以下の自動通知トリガーを設定します。</div>
+
+    <ul class="feature-list">
+      <li><span class="feature-bullet">&#9679;</span> 毎朝 8:55 に当日の予定を LINE に送信</li>
+      <li><span class="feature-bullet">&#9679;</span> 各予定の5分前にリマインダーを送信</li>
+      <li><span class="feature-bullet">&#9679;</span> トリガーは GAS のタイムベーストリガーとして登録されます</li>
+    </ul>
+
+    <div class="status" id="status-3"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goToStep(2)">&larr; 戻る</button>
+      <button class="btn btn-primary" id="btn-test-3" onclick="testStep3()">自動通知を有効にする</button>
+    </div>
+  </div>
+
+  <!-- Step 4: LINE Webhook を設定 -->
+  <div class="panel" id="step-4" style="display:none;">
+    <div class="panel-title">Step 4: LINE Webhook を設定</div>
+    <div class="panel-desc">以下の Webhook URL を LINE Developers に登録してください。</div>
+
+    <label class="form-label">Webhook URL</label>
+    <div class="copy-box">
+      <div class="copy-box-text" id="webhook-url">https://script.google.com/macros/s/AKfycbwQ1Vz9di8MD4ADi1kcVfvUdXyta9uVRN_Vmf5sDDNU5GrVV6DmSMZbcAG9zV_-XPMG/exec</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyWebhookUrl()">コピー</button>
+    </div>
+
+    <label class="form-label" style="margin-top:20px;">LINE Developers での設定手順</label>
+    <ol class="webhook-steps">
+      <li><a href="https://developers.line.biz/console/" target="_blank" rel="noopener" style="color:#4f46e5;font-weight:600;text-decoration:none;">LINE Developers</a> のチャネル設定を開く</li>
+      <li>「Messaging API設定」タブを選択</li>
+      <li>「Webhook URL」に上記の URL を貼り付けて「更新」</li>
+      <li>「Webhookの利用」をONに切り替え</li>
+      <li>「検証」ボタンを押して「成功」と表示されることを確認</li>
+    </ol>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goToStep(3)">&larr; 戻る</button>
+      <button class="btn btn-primary" onclick="goToStep(5)">次へ &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 5: 完了＆テスト -->
+  <div class="panel" id="step-5" style="display:none;">
+    <div class="completion">
+      <div class="completion-emoji">&#127881;</div>
+      <div class="completion-title">セットアップ完了！</div>
+    </div>
+
+    <div class="panel-desc" style="text-align:center;">すべての接続テストに成功しました。CalPush の準備が整いました。</div>
+
+    <ul class="check-list">
+      <li>
+        <span class="check-icon ok">&#10003;</span>
+        LINE Token — 接続OK
+      </li>
+      <li>
+        <span class="check-icon ok">&#10003;</span>
+        Google Calendar — アクセスOK
+      </li>
+      <li>
+        <span class="check-icon ok">&#10003;</span>
+        Gmail — 読み取りOK
+      </li>
+      <li>
+        <span class="check-icon ok">&#10003;</span>
+        LINE User ID — 登録済み
+      </li>
+    </ul>
+
+    <div class="link-cards">
+      <a href="index.html" class="link-card">
+        <div class="link-card-title">スケジュール管理</div>
+        <div class="link-card-desc">週間予定を確認・編集</div>
+      </a>
+      <a href="index.html" class="link-card">
+        <div class="link-card-title">空き枠仮押さえ</div>
+        <div class="link-card-desc">候補日時を一括管理</div>
+      </a>
+    </div>
+
+    <div class="btn-row" style="justify-content:center;margin-top:28px;">
+      <button class="btn btn-back" onclick="goToStep(4)">&larr; 戻る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var currentStep = 1;
+  var completedSteps = {};
+
+  function updateIndicators() {
+    for (var i = 1; i <= 5; i++) {
+      var dot = document.getElementById('dot-' + i);
+      dot.className = 'step-dot';
+      if (i === currentStep) dot.classList.add('active');
+      else if (completedSteps[i]) { dot.classList.add('done'); dot.textContent = '\u2713'; }
+      else dot.textContent = i;
+
+      if (i < 5) {
+        var line = document.getElementById('line-' + i);
+        line.className = 'step-line' + (completedSteps[i] ? ' done' : '');
+      }
+    }
+  }
+
+  function goToStep(n) {
+    document.getElementById('step-' + currentStep).style.display = 'none';
+    currentStep = n;
+    var panel = document.getElementById('step-' + n);
+    panel.style.display = 'block';
+    panel.style.animation = 'none';
+    panel.offsetHeight; // trigger reflow
+    panel.style.animation = 'fadeIn 0.3s ease';
+    updateIndicators();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showStatus(id, type, html) {
+    var el = document.getElementById(id);
+    el.className = 'status show status-' + type;
+    el.innerHTML = html;
+  }
+
+  function hideStatus(id) {
+    document.getElementById(id).className = 'status';
+  }
+
+  function toggleGuide(id) {
+    var el = document.getElementById(id);
+    var arrow = document.getElementById('arrow-' + id);
+    if (el.classList.contains('show')) {
+      el.classList.remove('show');
+      arrow.classList.remove('open');
+    } else {
+      el.classList.add('show');
+      arrow.classList.add('open');
+    }
+  }
+
+  // Step 1: LINE Bot test
+  function testStep1() {
+    var token = document.getElementById('line-token').value.trim();
+    if (!token) {
+      showStatus('status-1', 'error', 'Channel Access Token を入力してください。');
+      return;
+    }
+    var btn = document.getElementById('btn-test-1');
+    btn.disabled = true;
+    showStatus('status-1', 'loading', '<div class="spinner"></div> 接続テスト中...');
+
+    setTimeout(function() {
+      btn.disabled = false;
+      showStatus('status-1', 'success', '<strong>&#10003; 接続成功</strong> &mdash; Bot名: CalPush Demo');
+      completedSteps[1] = true;
+      updateIndicators();
+      setTimeout(function() { goToStep(2); }, 800);
+    }, 1000);
+  }
+
+  // Step 2: Calendar test
+  function testStep2() {
+    var calId = document.getElementById('calendar-id').value.trim();
+    if (!calId) {
+      showStatus('status-2', 'error', 'Calendar ID を入力してください。');
+      return;
+    }
+    var btn = document.getElementById('btn-test-2');
+    btn.disabled = true;
+    showStatus('status-2', 'loading', '<div class="spinner"></div> 接続テスト中...');
+
+    setTimeout(function() {
+      btn.disabled = false;
+      showStatus('status-2', 'success', '<strong>&#10003; 接続成功</strong> &mdash; カレンダー名: マイカレンダー');
+      completedSteps[2] = true;
+      updateIndicators();
+      setTimeout(function() { goToStep(3); }, 800);
+    }, 1000);
+  }
+
+  // Step 3: Enable notifications
+  function testStep3() {
+    var btn = document.getElementById('btn-test-3');
+    btn.disabled = true;
+    showStatus('status-3', 'loading', '<div class="spinner"></div> トリガーを設定中...');
+
+    setTimeout(function() {
+      btn.disabled = false;
+      showStatus('status-3', 'success', '<strong>&#10003; 設定完了</strong> &mdash; 毎朝通知・5分前リマインダーが有効になりました');
+      completedSteps[3] = true;
+      updateIndicators();
+      setTimeout(function() { goToStep(4); }, 800);
+    }, 500);
+  }
+
+  // Step 4: Copy webhook URL
+  function copyWebhookUrl() {
+    var url = document.getElementById('webhook-url').textContent;
+    var btn = document.getElementById('copy-btn');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function() {
+        btn.textContent = 'OK!';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 2000);
+      });
+    } else {
+      // Fallback
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'OK!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 2000);
+    }
+    completedSteps[4] = true;
+    updateIndicators();
+  }
+
+  // Mark step 5 as visited
+  var origGoToStep = goToStep;
+  goToStep = function(n) {
+    if (n === 5) completedSteps[5] = true;
+    origGoToStep(n);
+  };
+</script>
+
+</body>
+</html>
