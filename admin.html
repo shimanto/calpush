@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Segoe UI', 'Hiragino Sans', sans-serif; background: #f8fafc; color: #334155; display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; background: #1e293b; color: #e2e8f0; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-brand { padding: 20px 16px; border-bottom: 1px solid #334155; }
+  .sidebar-brand h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  .sidebar-brand .subtitle { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; font-size: 14px; color: #94a3b8; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: #334155; color: #e2e8f0; }
+  .nav-item.active { background: #334155; color: #fff; border-left-color: #818cf8; }
+  .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .nav-section { padding: 16px 20px 6px; font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; }
+  .sidebar-footer { padding: 12px 16px; border-top: 1px solid #334155; font-size: 11px; color: #64748b; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .status-dot.ok { background: #4ade80; }
+  .status-dot.ng { background: #f87171; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .topbar h2 { font-size: 18px; font-weight: 600; color: #1e293b; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+  .card-header h3 { font-size: 15px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: #4f46e5; color: #fff; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn-success { background: #059669; color: #fff; }
+  .btn-success:hover { background: #047857; }
+  .btn-danger { background: #dc2626; color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-outline { background: transparent; border: 1px solid #d1d5db; color: #374151; }
+  .btn-outline:hover { background: #f9fafb; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-icon { background: none; border: none; cursor: pointer; padding: 4px; color: #64748b; font-size: 16px; }
+  .btn-icon:hover { color: #1e293b; }
+
+  /* Forms */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 4px; }
+  .form-group .hint { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  input[type="text"], input[type="date"], input[type="time"], select {
+    width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #1e293b;
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.1); }
+  .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; }
+
+  /* Schedule grid */
+  .schedule-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .schedule-nav .week-label { font-size: 15px; font-weight: 600; min-width: 200px; text-align: center; }
+  .schedule-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+  .day-col { min-height: 120px; }
+  .day-header { font-size: 13px; font-weight: 600; padding: 8px; border-radius: 6px 6px 0 0; background: #f1f5f9; text-align: center; }
+  .day-header.today { background: #4f46e5; color: #fff; }
+  .day-header.sunday { color: #dc2626; }
+  .day-header.saturday { color: #2563eb; }
+  .day-events { padding: 6px; min-height: 80px; }
+  .event-card { padding: 6px 8px; margin-bottom: 4px; border-radius: 4px; font-size: 12px; cursor: pointer; border-left: 3px solid #4f46e5; background: #f8fafc; transition: background 0.1s; }
+  .event-card:hover { background: #eef2ff; }
+  .event-card .ev-time { color: #64748b; font-size: 11px; }
+  .event-card .ev-title { font-weight: 500; margin-top: 1px; }
+  .event-card.tentative { border-left-color: #f59e0b; background: #fffbeb; }
+  .event-card.tentative:hover { background: #fef3c7; }
+  .event-card.confirmed { border-left-color: #10b981; background: #ecfdf5; }
+  .event-card.confirmed:hover { background: #d1fae5; }
+  .event-badge { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; margin-left: 4px; }
+  .badge-tentative { background: #fef3c7; color: #b45309; }
+  .badge-confirmed { background: #d1fae5; color: #047857; }
+  .badge-recurring { font-size: 11px; }
+
+  /* Domain list */
+  .domain-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+  .domain-row:last-child { border-bottom: none; }
+  .domain-label-tag { background: #f1f5f9; padding: 3px 8px; border-radius: 4px; font-size: 12px; min-width: 80px; text-align: center; }
+  .domain-name { flex: 1; font-size: 14px; font-weight: 500; }
+
+  /* Mail history */
+  .mail-row { padding: 12px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.1s; }
+  .mail-row:hover { background: #f8fafc; }
+  .mail-row:last-child { border-bottom: none; }
+  .mail-subject { font-size: 14px; font-weight: 500; color: #1e293b; }
+  .mail-meta { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+
+  /* Booking slots */
+  .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; margin-top: 8px; }
+  .slot { padding: 8px; text-align: center; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.15s; }
+  .slot.available { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+  .slot.available:hover { background: #d1fae5; }
+  .slot.selected { background: #fef3c7; border-color: #fbbf24; color: #92400e; }
+  .slot.busy { background: #f1f5f9; color: #94a3b8; cursor: default; }
+  .booking-day { margin-bottom: 16px; }
+  .booking-day-header { font-size: 14px; font-weight: 600; margin-bottom: 6px; padding: 6px 0; border-bottom: 1px solid #e2e8f0; }
+  .tentative-group { margin-bottom: 16px; }
+  .tentative-group-header { font-size: 14px; font-weight: 600; color: #b45309; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .tentative-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #fffbeb; border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
+  .tentative-item .ti-date { color: #92400e; font-weight: 500; min-width: 100px; }
+  .tentative-item .ti-time { color: #78716c; min-width: 100px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .modal h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; color: #1e293b; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+  /* Setup wizard */
+  .setup-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 200; display: flex; align-items: center; justify-content: center; }
+  .setup-box { background: #fff; border-radius: 16px; padding: 40px; width: 90%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); text-align: center; }
+  .setup-box .logo { font-size: 48px; margin-bottom: 16px; }
+  .setup-box h1 { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .setup-box .tagline { font-size: 14px; color: #64748b; margin-bottom: 32px; }
+  .setup-box .form-group { text-align: left; }
+  .setup-step { display: none; }
+  .setup-step.active { display: block; }
+  .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+  .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #e2e8f0; }
+  .step-dot.active { background: #4f46e5; }
+  .step-dot.done { background: #10b981; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; z-index: 300; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .toast.show { display: flex; align-items: center; gap: 8px; }
+
+  /* Utility */
+  .text-muted { color: #94a3b8; font-size: 13px; }
+  .text-center { text-align: center; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .flex { display: flex; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .gap-8 { gap: 8px; }
+  .gap-16 { gap: 16px; }
+  .inline-flex { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Tabs for booking sub-sections */
+  .sub-tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px; }
+  .sub-tab { padding: 8px 20px; font-size: 14px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+  .sub-tab.active { color: #4f46e5; border-bottom-color: #4f46e5; font-weight: 600; }
+  .sub-panel { display: none; }
+  .sub-panel.active { display: block; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Booking controls bar */
+  .controls-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .controls-bar label { font-size: 13px; color: #475569; }
+  .controls-bar select { width: auto; padding: 6px 10px; font-size: 13px; }
+
+  /* Settings grid */
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }
+
+  .trigger-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+  .trigger-item:last-child { border-bottom: none; }
+  .trigger-name { font-weight: 500; }
+  .trigger-type { color: #94a3b8; font-size: 12px; }
+
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #e2e8f0; border-top-color: #4f46e5; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ===== Setup Wizard (shown if not configured) ===== -->
+<? if (!setupComplete) { ?>
+<div class="setup-overlay" id="setup-overlay">
+  <div class="setup-box">
+    <div class="logo">📅</div>
+    <h1>CalPush</h1>
+    <p class="tagline">Google Calendar × Gmail × LINE 通知を簡単セットアップ</p>
+
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+    </div>
+
+    <!-- Step 1: LINE Token -->
+    <div class="setup-step active" id="step-1">
+      <div class="form-group">
+        <label>LINE Channel Access Token</label>
+        <input type="text" id="setup-token" placeholder="トークンを貼り付け">
+        <div class="hint">LINE Developers → チャネル → Messaging API → Channel access token</div>
+      </div>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn btn-primary" onclick="setupNext(1)">次へ</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Calendar ID -->
+    <div class="setup-step" id="step-2">
+      <div class="form-group">
+        <label>Google Calendar ID</label>
+        <input type="text" id="setup-calid" placeholder="example@gmail.com または カレンダーID">
+        <div class="hint">Google Calendar → 設定 → カレンダーの統合 → カレンダーID</div>
+      </div>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn btn-outline" onclick="setupPrev(2)">戻る</button>
+        <button class="btn btn-primary" onclick="setupNext(2)">次へ</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div class="setup-step" id="step-3">
+      <div style="padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+        <h2 style="font-size:18px;margin-bottom:8px;">準備完了！</h2>
+        <p class="text-muted">設定を保存してCalPushを開始します。</p>
+        <p class="text-muted mt-8">LINE Webhook URL にこのウェブアプリの URL を設定してください。</p>
+        <p class="text-muted mt-8">LINEでメッセージを送ると LINE_TO_USER_ID が自動保存されます。</p>
+      </div>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn btn-outline" onclick="setupPrev(3)">戻る</button>
+        <button class="btn btn-success" onclick="completeSetup()" id="setup-save-btn">セットアップ完了</button>
+      </div>
+    </div>
+  </div>
+</div>
+<? } ?>
+
+<!-- ===== Sidebar ===== -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <h1>📅 CalPush</h1>
+    <div class="subtitle">Schedule × LINE Notify</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">メイン</div>
+    <div class="nav-item active" onclick="showPanel('schedule')" data-panel="schedule">
+      <span class="icon">📋</span> スケジュール
+    </div>
+    <div class="nav-item" onclick="showPanel('email')" data-panel="email">
+      <span class="icon">📧</span> メール通知
+    </div>
+    <div class="nav-item" onclick="showPanel('booking')" data-panel="booking">
+      <span class="icon">🗓</span> 空き枠管理
+    </div>
+    <div class="nav-section">システム</div>
+    <div class="nav-item" onclick="showPanel('settings')" data-panel="settings">
+      <span class="icon">⚙️</span> 設定
+    </div>
+  </nav>
+  <div class="sidebar-footer" id="sidebar-status">
+    <span class="status-dot ng" id="status-indicator"></span>
+    <span id="status-text">読み込み中...</span>
+  </div>
+</div>
+
+<!-- ===== Main Content ===== -->
+<div class="main">
+  <div class="topbar">
+    <h2 id="topbar-title">スケジュール</h2>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== Schedule Panel ===== -->
+    <div class="panel active" id="panel-schedule">
+      <div class="schedule-nav">
+        <button class="btn btn-outline btn-sm" onclick="prevWeek()">&lt; 前週</button>
+        <div class="week-label" id="week-label"></div>
+        <button class="btn btn-outline btn-sm" onclick="nextWeek()">翌週 &gt;</button>
+        <button class="btn btn-outline btn-sm" onclick="weekOffset=0;loadSchedule()">今週</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ 予定追加</button>
+      </div>
+      <div class="schedule-grid" id="schedule-grid">
+        <div class="text-center text-muted" style="grid-column:1/-1;padding:40px;">
+          <div class="spinner"></div> 読み込み中...
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Email Panel ===== -->
+    <div class="panel" id="panel-email">
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="showSubTab('email','domains')">通知先管理</div>
+        <div class="sub-tab" onclick="showSubTab('email','history')">通知履歴</div>
+      </div>
+
+      <div class="sub-panel active" id="email-domains">
+        <div class="card">
+          <div class="card-header">
+            <h3>通知対象ドメイン / メールアドレス</h3>
+            <button class="btn btn-primary btn-sm" onclick="openAddDomainModal()">+ 追加</button>
+          </div>
+          <div class="card-body" id="domain-list">
+            <div class="text-center text-muted"><div class="spinner"></div> 読み込み中...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-panel" id="email-history">
+        <div class="card">
+          <div class="card-header">
+            <h3>通知済みメール</h3>
+            <button class="btn btn-outline btn-sm" onclick="loadMailHistory()">更新</button>
+          </div>
+          <div class="card-body" id="mail-history">
+            <div class="text-center text-muted"><div class="spinner"></div> 読み込み中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Booking Panel ===== -->
+    <div class="panel" id="panel-booking">
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="showSubTab('booking','slots')">空き枠を確認</div>
+        <div class="sub-tab" onclick="showSubTab('booking','tentative')">仮押さえ済み</div>
+      </div>
+
+      <div class="sub-panel active" id="booking-slots">
+        <div class="controls-bar">
+          <label>営業日数</label>
+          <select id="slot-days" onchange="loadSlots()">
+            <option value="3">3営業日</option>
+            <option value="5" selected>5営業日</option>
+          </select>
+          <label>枠サイズ</label>
+          <select id="slot-minutes" onchange="loadSlots()">
+            <option value="60" selected>1時間</option>
+            <option value="30">30分</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openBatchModal()">仮押さえ確定</button>
+        </div>
+        <div id="slots-container">
+          <div class="text-center text-muted" style="padding:40px;"><div class="spinner"></div> 読み込み中...</div>
+        </div>
+      </div>
+
+      <div class="sub-panel" id="booking-tentative">
+        <div class="flex-between mb-16">
+          <div></div>
+          <div class="flex gap-8">
+            <button class="btn btn-success btn-sm" onclick="confirmAllTentative()">すべて確定</button>
+            <button class="btn btn-danger btn-sm" onclick="releaseAllTentative()">すべて解放</button>
+          </div>
+        </div>
+        <div id="tentative-container">
+          <div class="text-center text-muted" style="padding:40px;"><div class="spinner"></div> 読み込み中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Settings Panel ===== -->
+    <div class="panel" id="panel-settings">
+      <div class="settings-grid">
+        <div class="card">
+          <div class="card-header"><h3>基本設定</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>LINE Channel Access Token</label>
+              <input type="text" id="cfg-token" placeholder="新しいトークンを入力（変更時のみ）">
+              <div class="hint" id="cfg-token-hint"></div>
+            </div>
+            <div class="form-group">
+              <label>Google Calendar ID</label>
+              <input type="text" id="cfg-calid" placeholder="">
+            </div>
+            <div class="form-group">
+              <label>LINE User ID</label>
+              <input type="text" id="cfg-userid" placeholder="" disabled>
+              <div class="hint">LINEからメッセージ送信で自動保存されます</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveSettings()">設定を保存</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>トリガー管理</h3>
+            <button class="btn btn-outline btn-sm" onclick="setupTriggersFromUI()">トリガー再作成</button>
+          </div>
+          <div class="card-body" id="trigger-list">
+            <div class="text-center text-muted"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Webhook URL</h3></div>
+        <div class="card-body">
+          <p class="text-muted mb-8">LINE Developers の Webhook URL に以下を設定してください:</p>
+          <div style="background:#f1f5f9;padding:12px;border-radius:6px;font-family:monospace;font-size:13px;word-break:break-all;" id="webhook-url">読み込み中...</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ===== Modals ===== -->
+
+<!-- Add/Edit Event Modal -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal">
+    <h2 id="event-modal-title">予定追加</h2>
+    <input type="hidden" id="ev-id">
+    <input type="hidden" id="ev-orig-date">
+    <div class="form-group">
+      <label>日付</label>
+      <input type="date" id="ev-date">
+    </div>
+    <div class="form-group">
+      <label class="checkbox-label"><input type="checkbox" id="ev-allday" onchange="toggleAllDay()"> 終日</label>
+    </div>
+    <div id="ev-time-fields">
+      <div class="flex gap-8">
+        <div class="form-group" style="flex:1;">
+          <label>開始</label>
+          <input type="time" id="ev-start" value="09:00">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>終了</label>
+          <input type="time" id="ev-end" value="10:00">
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>タイトル</label>
+      <input type="text" id="ev-title" placeholder="予定のタイトル">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('event-modal')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEvent()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Event Modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <h2>予定を削除</h2>
+    <p style="margin-bottom:8px;">この予定を削除してよろしいですか？</p>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;font-size:14px;" id="delete-info"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('delete-modal')">キャンセル</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Release Tentative Modal (from schedule view) -->
+<div class="modal-overlay" id="release-modal">
+  <div class="modal">
+    <h2>仮押さえを解放</h2>
+    <p>この仮押さえを解放（削除）してよろしいですか？</p>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:14px;margin-top:8px;" id="release-info"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('release-modal')">キャンセル</button>
+      <button class="btn btn-danger" onclick="confirmRelease()">解放する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Domain Modal -->
+<div class="modal-overlay" id="domain-modal">
+  <div class="modal">
+    <h2>通知先を追加</h2>
+    <div class="form-group">
+      <label>ドメイン / メールアドレス</label>
+      <input type="text" id="add-domain" placeholder="example.com または user@example.com">
+    </div>
+    <div class="form-group">
+      <label>表示ラベル</label>
+      <input type="text" id="add-domain-label" placeholder="📩【表示名】">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('domain-modal')">キャンセル</button>
+      <button class="btn btn-primary" onclick="addDomain()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Domain Modal -->
+<div class="modal-overlay" id="domain-delete-modal">
+  <div class="modal">
+    <h2>通知先を削除</h2>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;font-size:14px;margin-bottom:12px;" id="domain-delete-info"></div>
+    <p class="text-muted">この通知先を削除してよろしいですか？</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('domain-delete-modal')">キャンセル</button>
+      <button class="btn btn-danger" onclick="confirmDeleteDomain()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mail Detail Modal -->
+<div class="modal-overlay" id="mail-modal">
+  <div class="modal" style="max-width:560px;">
+    <h2 id="mail-modal-subject">件名</h2>
+    <div class="text-muted mb-8" id="mail-modal-meta"></div>
+    <div style="background:#f8fafc;border-radius:8px;padding:12px;max-height:200px;overflow-y:auto;font-size:13px;white-space:pre-wrap;margin-bottom:16px;" id="mail-modal-body"></div>
+    <h3 style="font-size:14px;margin-bottom:12px;">スケジュールとして登録</h3>
+    <div class="flex gap-8">
+      <div class="form-group" style="flex:1;">
+        <label>日付</label>
+        <input type="date" id="mail-ev-date">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>開始</label>
+        <input type="time" id="mail-ev-start">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>終了</label>
+        <input type="time" id="mail-ev-end">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>タイトル</label>
+      <input type="text" id="mail-ev-title">
+    </div>
+    <div class="form-group">
+      <label>招待先メールアドレス（任意）</label>
+      <input type="text" id="mail-ev-guests" placeholder="user@example.com">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('mail-modal')">閉じる</button>
+      <button class="btn btn-success" onclick="confirmMailSchedule()">登録 &amp; 招待送信</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Tentative Modal -->
+<div class="modal-overlay" id="batch-modal">
+  <div class="modal" style="max-width:560px;">
+    <h2>仮押さえ確定</h2>
+    <div class="form-group">
+      <label>メモ（グループ名）</label>
+      <input type="text" id="batch-memo" placeholder="例: A社打合せ候補">
+    </div>
+    <p class="text-muted mb-8">選択した候補枠:</p>
+    <div id="batch-summary" style="background:#fffbeb;border-radius:8px;padding:12px;font-size:13px;max-height:200px;overflow-y:auto;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('batch-modal')">キャンセル</button>
+      <button class="btn btn-primary" onclick="confirmBatch()">一括仮押さえ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tentative Confirm Modal -->
+<div class="modal-overlay" id="tentative-confirm-modal">
+  <div class="modal">
+    <h2>仮押さえを確定</h2>
+    <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:12px;font-size:14px;margin-bottom:12px;" id="tentative-confirm-info"></div>
+    <div class="form-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="tentative-release-others" checked>
+        同グループの他の仮押さえを解放する
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('tentative-confirm-modal')">キャンセル</button>
+      <button class="btn btn-success" onclick="confirmTentative()">確定する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// State
+// ============================================================
+var weekOffset = 0;
+var _scheduleData = [];
+var _domainList = [];
+var _selectedSlots = [];
+var _slotsData = [];
+var _tentativeData = [];
+var _deleteTarget = null;
+var _releaseTarget = null;
+var _deleteDomain = null;
+var _confirmTarget = null;
+var _mailData = [];
+
+// ============================================================
+// Navigation
+// ============================================================
+var panelTitles = {
+  schedule: 'スケジュール',
+  email: 'メール通知',
+  booking: '空き枠管理',
+  settings: '設定'
+};
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.classList.toggle('active', n.getAttribute('data-panel') === name);
+  });
+  document.getElementById('topbar-title').textContent = panelTitles[name] || name;
+
+  // Lazy load
+  if (name === 'email' && !window._domainsLoaded) loadDomains();
+  if (name === 'booking' && !window._slotsLoaded) loadSlots();
+  if (name === 'settings' && !window._settingsLoaded) loadSettings();
+}
+
+function showSubTab(panel, tab) {
+  var container = document.getElementById('panel-' + panel);
+  container.querySelectorAll('.sub-tab').forEach(function(t, i) {
+    var tabs = panel === 'email' ? ['domains', 'history'] : ['slots', 'tentative'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  container.querySelectorAll('.sub-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById(panel + '-' + tab).classList.add('active');
+
+  if (panel === 'email' && tab === 'history' && !window._mailHistoryLoaded) loadMailHistory();
+  if (panel === 'booking' && tab === 'tentative' && !window._tentativeLoaded) loadTentative();
+}
+
+// ============================================================
+// Setup Wizard
+// ============================================================
+function setupNext(step) {
+  if (step === 1) {
+    var token = document.getElementById('setup-token').value.trim();
+    if (!token) { showToast('LINE Channel Access Token を入力してください'); return; }
+  }
+  if (step === 2) {
+    var calid = document.getElementById('setup-calid').value.trim();
+    if (!calid) { showToast('Calendar ID を入力してください'); return; }
+  }
+  document.getElementById('step-' + step).classList.remove('active');
+  document.getElementById('step-' + (step + 1)).classList.add('active');
+  document.getElementById('dot-' + step).classList.remove('active');
+  document.getElementById('dot-' + step).classList.add('done');
+  document.getElementById('dot-' + (step + 1)).classList.add('active');
+}
+
+function setupPrev(step) {
+  document.getElementById('step-' + step).classList.remove('active');
+  document.getElementById('step-' + (step - 1)).classList.add('active');
+  document.getElementById('dot-' + step).classList.remove('active');
+  document.getElementById('dot-' + (step - 1)).classList.remove('done');
+  document.getElementById('dot-' + (step - 1)).classList.add('active');
+}
+
+function completeSetup() {
+  var btn = document.getElementById('setup-save-btn');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+  var config = {
+    lineToken: document.getElementById('setup-token').value.trim(),
+    calendarId: document.getElementById('setup-calid').value.trim()
+  };
+  google.script.run
+    .withSuccessHandler(function(r) {
+      if (r.success) {
+        document.getElementById('setup-overlay').style.display = 'none';
+        showToast('セットアップ完了！');
+        loadSchedule();
+        loadStatus();
+      } else {
+        showToast(r.message);
+        btn.disabled = false;
+        btn.textContent = 'セットアップ完了';
+      }
+    })
+    .withFailureHandler(function(e) {
+      showToast('エラー: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'セットアップ完了';
+    })
+    .saveSetup(config);
+}
+
+// ============================================================
+// Schedule
+// ============================================================
+function loadSchedule() {
+  document.getElementById('schedule-grid').innerHTML = '<div class="text-center text-muted" style="grid-column:1/-1;padding:40px;"><div class="spinner"></div> 読み込み中...</div>';
+  google.script.run.withSuccessHandler(renderSchedule).withFailureHandler(function(e) {
+    document.getElementById('schedule-grid').innerHTML = '<div class="text-center text-muted" style="grid-column:1/-1;padding:40px;">読み込みに失敗しました</div>';
+  }).getWeekSchedule(weekOffset);
+}
+
+function renderSchedule(data) {
+  _scheduleData = data;
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+  if (data.length > 0) {
+    var first = data[0].label;
+    var last = data[data.length - 1].label;
+    document.getElementById('week-label').textContent = first + ' 〜 ' + last;
+  }
+
+  var html = '';
+  data.forEach(function(day, di) {
+    var isToday = day.date === todayStr;
+    var dow = new Date(day.date + 'T00:00:00+09:00').getDay();
+    var dayClass = isToday ? 'today' : (dow === 0 ? 'sunday' : (dow === 6 ? 'saturday' : ''));
+    html += '<div class="day-col">';
+    html += '<div class="day-header ' + dayClass + '">' + escapeHtml(day.label) + '</div>';
+    html += '<div class="day-events">';
+    if (day.events.length === 0) {
+      html += '<div class="text-muted text-center" style="padding:12px;font-size:12px;">予定なし</div>';
+    }
+    day.events.forEach(function(ev, ei) {
+      var cls = ev.tentative ? 'tentative' : (ev.confirmed ? 'confirmed' : '');
+      html += '<div class="event-card ' + cls + '" onclick="onEventClick(' + di + ',' + ei + ')">';
+      if (!ev.allDay) {
+        html += '<div class="ev-time">' + escapeHtml(ev.start) + '〜' + escapeHtml(ev.end) + '</div>';
+      } else {
+        html += '<div class="ev-time">終日</div>';
+      }
+      html += '<div class="ev-title">' + escapeHtml(ev.title);
+      if (ev.tentative) html += ' <span class="event-badge badge-tentative">仮</span>';
+      if (ev.confirmed) html += ' <span class="event-badge badge-confirmed">確定</span>';
+      if (ev.recurring) html += ' <span class="event-badge badge-recurring">🔁</span>';
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('schedule-grid').innerHTML = html;
+}
+
+function prevWeek() { weekOffset--; loadSchedule(); }
+function nextWeek() { weekOffset++; loadSchedule(); }
+
+function onEventClick(di, ei) {
+  var ev = _scheduleData[di].events[ei];
+  var day = _scheduleData[di];
+  if (ev.tentative) {
+    _releaseTarget = { id: ev.id, date: day.date, title: ev.title };
+    document.getElementById('release-info').textContent = ev.title + ' (' + day.label + ')';
+    openModal('release-modal');
+  } else {
+    openEditModal(ev, day);
+  }
+}
+
+// ============================================================
+// Event CRUD
+// ============================================================
+function openAddModal() {
+  document.getElementById('event-modal-title').textContent = '予定追加';
+  document.getElementById('ev-id').value = '';
+  document.getElementById('ev-orig-date').value = '';
+  var today = new Date();
+  document.getElementById('ev-date').value = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('ev-allday').checked = false;
+  document.getElementById('ev-start').value = '09:00';
+  document.getElementById('ev-end').value = '10:00';
+  document.getElementById('ev-title').value = '';
+  toggleAllDay();
+  openModal('event-modal');
+}
+
+function openEditModal(ev, day) {
+  document.getElementById('event-modal-title').textContent = '予定編集';
+  document.getElementById('ev-id').value = ev.id;
+  document.getElementById('ev-orig-date').value = day.date;
+  document.getElementById('ev-date').value = day.date;
+  document.getElementById('ev-allday').checked = ev.allDay;
+  document.getElementById('ev-start').value = ev.start || '09:00';
+  document.getElementById('ev-end').value = ev.end || '10:00';
+  document.getElementById('ev-title').value = ev.title;
+  toggleAllDay();
+  openModal('event-modal');
+}
+
+function toggleAllDay() {
+  document.getElementById('ev-time-fields').style.display = document.getElementById('ev-allday').checked ? 'none' : 'block';
+}
+
+function saveEvent() {
+  var data = {
+    eventId: document.getElementById('ev-id').value,
+    originalDate: document.getElementById('ev-orig-date').value,
+    date: document.getElementById('ev-date').value,
+    title: document.getElementById('ev-title').value.trim(),
+    allDay: document.getElementById('ev-allday').checked,
+    startTime: document.getElementById('ev-start').value,
+    endTime: document.getElementById('ev-end').value
+  };
+  if (!data.title) { showToast('タイトルを入力してください'); return; }
+  if (!data.date) { showToast('日付を選択してください'); return; }
+  closeModal('event-modal');
+
+  var handler = function(r) {
+    if (r.success) { showToast('保存しました'); loadSchedule(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  };
+  if (data.eventId) {
+    google.script.run.withSuccessHandler(handler).updateEventFromWeb(data);
+  } else {
+    google.script.run.withSuccessHandler(handler).addEventFromWeb(data);
+  }
+}
+
+function openDeleteModal(ev, day) {
+  _deleteTarget = { id: ev.id, date: day.date };
+  document.getElementById('delete-info').textContent = ev.title + ' (' + day.label + (ev.start ? ' ' + ev.start + '〜' + ev.end : ' 終日') + ')';
+  openModal('delete-modal');
+}
+
+function confirmDelete() {
+  if (!_deleteTarget) return;
+  closeModal('delete-modal');
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast('削除しました'); loadSchedule(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  }).deleteEventFromWeb(_deleteTarget.id, _deleteTarget.date);
+}
+
+function confirmRelease() {
+  if (!_releaseTarget) return;
+  closeModal('release-modal');
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast('解放しました'); loadSchedule(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  }).releaseTentativeEvent(_releaseTarget.id, _releaseTarget.date);
+}
+
+// ============================================================
+// Email Notification
+// ============================================================
+function loadDomains() {
+  window._domainsLoaded = true;
+  google.script.run.withSuccessHandler(renderDomains).getDomainList();
+}
+
+function renderDomains(data) {
+  _domainList = data;
+  if (data.length === 0) {
+    document.getElementById('domain-list').innerHTML = '<div class="empty-state"><div class="empty-icon">📧</div><p>通知先が登録されていません</p></div>';
+    return;
+  }
+  var html = '';
+  data.forEach(function(d, i) {
+    html += '<div class="domain-row">';
+    html += '<span class="domain-label-tag">' + escapeHtml(d.label || '📩') + '</span>';
+    html += '<span class="domain-name">' + escapeHtml(d.domain) + '</span>';
+    html += '<button class="btn btn-danger btn-sm" onclick="openDeleteDomainModal(' + i + ')">削除</button>';
+    html += '</div>';
+  });
+  document.getElementById('domain-list').innerHTML = html;
+}
+
+function openAddDomainModal() {
+  document.getElementById('add-domain').value = '';
+  document.getElementById('add-domain-label').value = '';
+  openModal('domain-modal');
+}
+
+function addDomain() {
+  var domain = document.getElementById('add-domain').value.trim();
+  var label = document.getElementById('add-domain-label').value.trim();
+  if (!domain) { showToast('ドメインまたはメールアドレスを入力してください'); return; }
+  closeModal('domain-modal');
+  google.script.run.withSuccessHandler(function(r) {
+    showToast(r.success ? '追加しました' : (r.error || 'エラー'));
+    loadDomains();
+  }).addDomainFromWeb(domain, label);
+}
+
+function openDeleteDomainModal(idx) {
+  var d = _domainList[idx];
+  _deleteDomain = d.domain;
+  document.getElementById('domain-delete-info').innerHTML = '<strong>' + escapeHtml(d.domain) + '</strong><br><span style="color:#64748b;">' + escapeHtml(d.label || 'ラベルなし') + '</span>';
+  openModal('domain-delete-modal');
+}
+
+function confirmDeleteDomain() {
+  if (!_deleteDomain) return;
+  closeModal('domain-delete-modal');
+  google.script.run.withSuccessHandler(function(r) {
+    showToast(r.success ? '削除しました' : (r.error || 'エラー'));
+    loadDomains();
+  }).removeDomainFromWeb(_deleteDomain);
+}
+
+// Mail History
+function loadMailHistory() {
+  window._mailHistoryLoaded = true;
+  document.getElementById('mail-history').innerHTML = '<div class="text-center text-muted"><div class="spinner"></div> 読み込み中...</div>';
+  google.script.run.withSuccessHandler(renderMailHistory).getNotifiedEmails();
+}
+
+function renderMailHistory(data) {
+  _mailData = data;
+  if (data.length === 0) {
+    document.getElementById('mail-history').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>通知履歴はありません</p></div>';
+    return;
+  }
+  var html = '';
+  data.forEach(function(m, i) {
+    html += '<div class="mail-row" onclick="openMailModal(' + i + ')">';
+    html += '<div class="mail-subject">' + escapeHtml(m.subject) + '</div>';
+    html += '<div class="mail-meta">' + escapeHtml(m.from) + ' | ' + m.date + '</div>';
+    html += '</div>';
+  });
+  document.getElementById('mail-history').innerHTML = html;
+}
+
+function openMailModal(idx) {
+  var m = _mailData[idx];
+  document.getElementById('mail-modal-subject').textContent = m.subject;
+  document.getElementById('mail-modal-meta').textContent = m.from + ' | ' + m.date;
+  document.getElementById('mail-modal-body').textContent = m.body;
+  document.getElementById('mail-ev-title').value = m.subject;
+  document.getElementById('mail-ev-guests').value = '';
+
+  // 日時の自動推測
+  var dateMatch = m.body.match(/(\d{1,2})\/(\d{1,2})/);
+  if (dateMatch) {
+    var y = new Date().getFullYear();
+    var mm = String(dateMatch[1]).padStart(2, '0');
+    var dd = String(dateMatch[2]).padStart(2, '0');
+    document.getElementById('mail-ev-date').value = y + '-' + mm + '-' + dd;
+  } else {
+    document.getElementById('mail-ev-date').value = '';
+  }
+  var timeMatch = m.body.match(/(\d{1,2}):(\d{2})\s*[~〜-]\s*(\d{1,2}):(\d{2})/);
+  if (timeMatch) {
+    document.getElementById('mail-ev-start').value = String(timeMatch[1]).padStart(2,'0') + ':' + timeMatch[2];
+    document.getElementById('mail-ev-end').value = String(timeMatch[3]).padStart(2,'0') + ':' + timeMatch[4];
+  } else {
+    document.getElementById('mail-ev-start').value = '';
+    document.getElementById('mail-ev-end').value = '';
+  }
+
+  // 差出人からメールアドレスを抽出
+  var emailMatch = m.from.match(/[\w.+-]+@[\w.-]+/);
+  if (emailMatch) {
+    document.getElementById('mail-ev-guests').value = emailMatch[0];
+  }
+
+  openModal('mail-modal');
+}
+
+function confirmMailSchedule() {
+  var data = {
+    date: document.getElementById('mail-ev-date').value,
+    startTime: document.getElementById('mail-ev-start').value,
+    endTime: document.getElementById('mail-ev-end').value,
+    title: document.getElementById('mail-ev-title').value.trim(),
+    guests: document.getElementById('mail-ev-guests').value.trim()
+  };
+  if (!data.date || !data.startTime || !data.endTime || !data.title) {
+    showToast('日付・時間・タイトルを入力してください');
+    return;
+  }
+  closeModal('mail-modal');
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast('スケジュール登録 & 招待送信しました'); loadSchedule(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  }).createEventWithInvitation(data);
+}
+
+// ============================================================
+// Booking - Slots
+// ============================================================
+function loadSlots() {
+  window._slotsLoaded = true;
+  _selectedSlots = [];
+  var days = parseInt(document.getElementById('slot-days').value);
+  var minutes = parseInt(document.getElementById('slot-minutes').value);
+  document.getElementById('slots-container').innerHTML = '<div class="text-center text-muted" style="padding:40px;"><div class="spinner"></div> 読み込み中...</div>';
+  google.script.run.withSuccessHandler(renderSlots).getAvailableSlots(days, minutes);
+}
+
+function renderSlots(data) {
+  _slotsData = data;
+  if (data.length === 0) {
+    document.getElementById('slots-container').innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>空き枠がありません</p></div>';
+    return;
+  }
+  var html = '';
+  data.forEach(function(day, di) {
+    html += '<div class="booking-day">';
+    html += '<div class="booking-day-header">' + escapeHtml(day.label) + '</div>';
+    html += '<div class="slot-grid">';
+    day.slots.forEach(function(slot, si) {
+      var cls = slot.available ? 'available' : 'busy';
+      html += '<div class="slot ' + cls + '" data-di="' + di + '" data-si="' + si + '" onclick="toggleSlot(this,' + di + ',' + si + ')">';
+      html += slot.start + '-' + slot.end;
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('slots-container').innerHTML = html;
+}
+
+function toggleSlot(el, di, si) {
+  var slot = _slotsData[di].slots[si];
+  if (!slot.available) return;
+  var key = di + '-' + si;
+  var idx = _selectedSlots.findIndex(function(s) { return s.key === key; });
+  if (idx >= 0) {
+    _selectedSlots.splice(idx, 1);
+    el.classList.remove('selected');
+    el.classList.add('available');
+  } else {
+    _selectedSlots.push({ key: key, di: di, si: si, date: _slotsData[di].date, label: _slotsData[di].label, start: slot.start, end: slot.end });
+    el.classList.remove('available');
+    el.classList.add('selected');
+  }
+}
+
+function openBatchModal() {
+  if (_selectedSlots.length === 0) { showToast('枠を選択してください'); return; }
+  document.getElementById('batch-memo').value = '';
+  var html = '';
+  _selectedSlots.forEach(function(s) {
+    html += '<div>' + s.label + ' ' + s.start + '〜' + s.end + '</div>';
+  });
+  document.getElementById('batch-summary').innerHTML = html;
+  openModal('batch-modal');
+}
+
+function confirmBatch() {
+  var memo = document.getElementById('batch-memo').value.trim() || '仮押さえ';
+  var events = _selectedSlots.map(function(s) {
+    return { date: s.date, start: s.start, end: s.end, memo: memo };
+  });
+  closeModal('batch-modal');
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast(r.count + '件 仮押さえしました'); loadSlots(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  }).createTentativeEventsBatch(events);
+}
+
+// ============================================================
+// Booking - Tentative
+// ============================================================
+function loadTentative() {
+  window._tentativeLoaded = true;
+  document.getElementById('tentative-container').innerHTML = '<div class="text-center text-muted" style="padding:40px;"><div class="spinner"></div> 読み込み中...</div>';
+  google.script.run.withSuccessHandler(renderTentative).getTentativeEvents();
+}
+
+function renderTentative(data) {
+  _tentativeData = data;
+  if (data.length === 0) {
+    document.getElementById('tentative-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>仮押さえはありません</p></div>';
+    return;
+  }
+
+  // グループ化
+  var groups = {};
+  data.forEach(function(t, i) {
+    if (!groups[t.group]) groups[t.group] = [];
+    groups[t.group].push({ idx: i, data: t });
+  });
+
+  var html = '';
+  Object.keys(groups).forEach(function(g) {
+    html += '<div class="tentative-group">';
+    html += '<div class="tentative-group-header"><span>📌 ' + escapeHtml(g) + '</span><span class="text-muted">(' + groups[g].length + '件)</span></div>';
+    groups[g].forEach(function(item) {
+      var t = item.data;
+      html += '<div class="tentative-item">';
+      html += '<span class="ti-date">' + escapeHtml(t.dateLabel) + '</span>';
+      html += '<span class="ti-time">' + escapeHtml(t.start) + '〜' + escapeHtml(t.end) + '</span>';
+      html += '<span style="flex:1;"></span>';
+      html += '<button class="btn btn-success btn-sm" onclick="openTentativeConfirm(' + item.idx + ')">確定</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="releaseSingleTentative(' + item.idx + ')">解放</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('tentative-container').innerHTML = html;
+}
+
+function openTentativeConfirm(idx) {
+  var t = _tentativeData[idx];
+  _confirmTarget = t;
+  document.getElementById('tentative-confirm-info').textContent = t.title + ' (' + t.dateLabel + ' ' + t.start + '〜' + t.end + ')';
+  document.getElementById('tentative-release-others').checked = true;
+  openModal('tentative-confirm-modal');
+}
+
+function confirmTentative() {
+  if (!_confirmTarget) return;
+  var t = _confirmTarget;
+  var releaseOthers = document.getElementById('tentative-release-others').checked;
+  closeModal('tentative-confirm-modal');
+
+  var handler = function(r) {
+    if (r.success) { showToast('確定しました'); window._tentativeLoaded = false; loadTentative(); loadSchedule(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  };
+
+  if (releaseOthers) {
+    google.script.run.withSuccessHandler(handler).confirmOneAndReleaseOthers(t.id, t.date, t.group);
+  } else {
+    google.script.run.withSuccessHandler(handler).confirmTentativeEvent(t.id, t.date);
+  }
+}
+
+function releaseSingleTentative(idx) {
+  var t = _tentativeData[idx];
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast('解放しました'); window._tentativeLoaded = false; loadTentative(); }
+    else { showToast('エラー: ' + (r.error || '不明')); }
+  }).releaseTentativeEvent(t.id, t.date);
+}
+
+function confirmAllTentative() {
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast(r.count + '件 確定しました'); window._tentativeLoaded = false; loadTentative(); loadSchedule(); }
+    else { showToast('エラー'); }
+  }).confirmAllTentativeEvents();
+}
+
+function releaseAllTentative() {
+  google.script.run.withSuccessHandler(function(r) {
+    if (r.success) { showToast(r.count + '件 解放しました'); window._tentativeLoaded = false; loadTentative(); }
+    else { showToast('エラー'); }
+  }).releaseAllTentativeEvents();
+}
+
+// ============================================================
+// Settings
+// ============================================================
+function loadSettings() {
+  window._settingsLoaded = true;
+  google.script.run.withSuccessHandler(function(config) {
+    document.getElementById('cfg-token').value = '';
+    document.getElementById('cfg-token-hint').textContent = config.hasToken ? '設定済み (' + config.tokenPreview + ')' : '未設定';
+    document.getElementById('cfg-calid').value = config.calendarId || '';
+    document.getElementById('cfg-userid').value = config.userId || '(未取得)';
+    document.getElementById('webhook-url').textContent = ScriptApp ? '(GASエディタから取得してください)' : '';
+  }).getConfig();
+
+  google.script.run.withSuccessHandler(function(triggers) {
+    if (triggers.length === 0) {
+      document.getElementById('trigger-list').innerHTML = '<div class="text-muted">トリガーが設定されていません</div>';
+      return;
+    }
+    var html = '';
+    triggers.forEach(function(t) {
+      html += '<div class="trigger-item"><span class="trigger-name">' + escapeHtml(t.handler) + '</span><span class="trigger-type">' + escapeHtml(t.type) + '</span></div>';
+    });
+    document.getElementById('trigger-list').innerHTML = html;
+  }).getTriggerList();
+
+  // Webhook URL
+  try {
+    google.script.url.getUrl(function(url) {
+      document.getElementById('webhook-url').textContent = url;
+    });
+  } catch(e) {
+    document.getElementById('webhook-url').textContent = '(デプロイ後にURLが表示されます)';
+  }
+}
+
+function saveSettings() {
+  var config = {};
+  var token = document.getElementById('cfg-token').value.trim();
+  var calid = document.getElementById('cfg-calid').value.trim();
+  if (token) config.lineToken = token;
+  if (calid) config.calendarId = calid;
+  if (!token && !calid) { showToast('変更する項目を入力してください'); return; }
+  google.script.run.withSuccessHandler(function(r) {
+    showToast(r.success ? '設定を保存しました' : r.message);
+    window._settingsLoaded = false;
+    loadSettings();
+  }).updateConfig(config);
+}
+
+function setupTriggersFromUI() {
+  google.script.run.withSuccessHandler(function(r) {
+    showToast(r.success ? 'トリガーを再作成しました' : r.message);
+    window._settingsLoaded = false;
+    loadSettings();
+  }).setupTriggers();
+}
+
+// ============================================================
+// Status
+// ============================================================
+function loadStatus() {
+  google.script.run.withSuccessHandler(function(status) {
+    var indicator = document.getElementById('status-indicator');
+    var text = document.getElementById('status-text');
+    if (status.complete) {
+      indicator.className = 'status-dot ok';
+      text.textContent = status.hasUserId ? '正常稼働中' : '設定済み (LINE未連携)';
+    } else {
+      indicator.className = 'status-dot ng';
+      text.textContent = '未設定: ' + status.missing.join(', ');
+    }
+  }).getSetupStatus();
+}
+
+// ============================================================
+// Utility
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// Init
+// ============================================================
+loadSchedule();
+loadStatus();
+</script>
+</body>
+</html>

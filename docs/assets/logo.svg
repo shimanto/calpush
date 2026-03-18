@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <!-- Calendar icon element -->
+  <rect x="4" y="12" width="40" height="38" rx="6" fill="#4f46e5" />
+  <rect x="4" y="12" width="40" height="12" rx="6" fill="#3730a3" />
+  <rect x="12" y="8" width="4" height="8" rx="2" fill="#1e293b" />
+  <rect x="32" y="8" width="4" height="8" rx="2" fill="#1e293b" />
+  <rect x="12" y="32" width="6" height="6" rx="1" fill="#fff" />
+  <rect x="21" y="32" width="6" height="6" rx="1" fill="#fff" />
+  <rect x="30" y="32" width="6" height="6" rx="1" fill="#fff" />
+  <rect x="12" y="41" width="6" height="4" rx="1" fill="#c7d2fe" />
+  <rect x="21" y="41" width="6" height="4" rx="1" fill="#c7d2fe" />
+
+  <!-- "Ca" text -->
+  <text x="50" y="48" font-family="'Segoe UI', -apple-system, sans-serif" font-size="42" font-weight="700" fill="#1e293b">Ca</text>
+
+  <!-- "L" as LINE-style speech bubble -->
+  <g transform="translate(108, 10)">
+    <!-- Speech bubble shape -->
+    <rect x="0" y="0" width="38" height="34" rx="8" fill="#06C755" />
+    <polygon points="10,34 16,42 22,34" fill="#06C755" />
+    <!-- Letter L inside -->
+    <text x="10" y="28" font-family="'Segoe UI', -apple-system, sans-serif" font-size="28" font-weight="800" fill="#fff">L</text>
+  </g>
+
+  <!-- "Push" text -->
+  <text x="150" y="48" font-family="'Segoe UI', -apple-system, sans-serif" font-size="42" font-weight="400" fill="#64748b">Push</text>
+
+  <!-- Small notification dot -->
+  <circle cx="300" cy="14" r="7" fill="#f59e0b" />
+  <text x="297" y="18" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">!</text>
+</svg>
