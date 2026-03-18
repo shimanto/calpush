@@ -20,7 +20,53 @@
     .demo-banner { background: #fffbeb; border-bottom: 1px solid #fde68a; padding: 10px 24px; text-align: center; font-size: 13px; color: #92400e; font-weight: 600; margin-top: 53px; }
 
     /* Main container */
-    .wizard { max-width: 600px; margin: 24px auto 60px; padding: 0 20px; }
+    .wizard { max-width: 1100px; margin: 24px auto 60px; padding: 0 20px; }
+
+    /* 2-column layout for steps with mock panels */
+    .step-layout { display: flex; gap: 24px; align-items: flex-start; }
+    .step-left { flex: 1; min-width: 0; }
+    .step-right { flex: 1; min-width: 0; }
+
+    /* Mock console panels */
+    .mock-console { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .mock-console-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+    .mock-console-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .mock-console-dot.r { background: #f87171; }
+    .mock-console-dot.y { background: #fbbf24; }
+    .mock-console-dot.g { background: #4ade80; }
+    .mock-console-url { flex: 1; background: #f1f5f9; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #94a3b8; font-family: monospace; margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mock-console-body { padding: 16px; }
+
+    .mock-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #92400e; margin-bottom: 16px; text-align: center; line-height: 1.5; }
+
+    /* LINE mock */
+    .line-mock-nav { display: flex; gap: 2px; margin-bottom: 16px; }
+    .line-mock-tab { flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 600; border-bottom: 2px solid transparent; color: #94a3b8; cursor: default; }
+    .line-mock-tab.active { color: #06c755; border-bottom-color: #06c755; }
+    .line-mock-section { margin-bottom: 16px; }
+    .line-mock-label { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; }
+    .line-mock-field { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #475569; font-family: monospace; word-break: break-all; line-height: 1.5; min-height: 44px; }
+    .line-mock-field.long { font-size: 10px; min-height: 60px; }
+    .mock-copy-btn { display: block; width: 100%; margin-top: 8px; padding: 8px; background: #06c755; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+    .mock-copy-btn:hover { background: #05a648; }
+    .mock-copy-btn.copied { background: #059669; }
+
+    /* Google mock */
+    .gcal-mock-breadcrumb { font-size: 11px; color: #94a3b8; margin-bottom: 12px; }
+    .gcal-mock-breadcrumb span { color: #1a73e8; }
+    .gcal-mock-section { margin-bottom: 16px; }
+    .gcal-mock-heading { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .gcal-mock-row { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; font-size: 13px; }
+    .gcal-mock-row .cal-name { font-weight: 600; }
+    .gcal-mock-row .cal-id { font-family: monospace; font-size: 11px; color: #64748b; }
+    .gcal-copy-btn { padding: 6px 14px; background: #1a73e8; color: #fff; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; flex-shrink: 0; }
+    .gcal-copy-btn:hover { background: #1557b0; }
+    .gcal-copy-btn.copied { background: #059669; }
+
+    @media (max-width: 768px) {
+      .step-layout { flex-direction: column; }
+      .step-right { order: -1; }
+    }
 
     /* Step indicators */
     .step-indicators { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 32px; }
@@ -152,67 +198,117 @@
   </div>
 
   <!-- Step 1: LINE Bot 接続 -->
-  <div class="panel" id="step-1">
-    <div class="panel-title">Step 1: LINE Bot 接続</div>
-    <div class="panel-desc">LINE Messaging API の Channel Access Token を入力してください。</div>
+  <div id="step-1">
+    <div class="step-layout">
+      <div class="step-left">
+        <div class="panel">
+          <div class="panel-title">Step 1: LINE Bot 接続</div>
+          <div class="panel-desc">右の LINE Developers 画面からトークンをコピーして貼り付けてください。</div>
 
-    <button class="guide-toggle" onclick="toggleGuide('guide-1')">
-      <span class="guide-arrow" id="arrow-guide-1">&#9654;</span>
-      トークンの取得方法を見る
-    </button>
-    <div class="guide-content" id="guide-1">
-      <ol>
-        <li><a href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers</a> にログイン</li>
-        <li>プロバイダーを選択（または新規作成）</li>
-        <li>Messaging API チャネルを選択</li>
-        <li>「Messaging API設定」タブを開く</li>
-        <li>「チャネルアクセストークン（長期）」の「発行」をクリック</li>
-        <li>表示されたトークンをコピー</li>
-      </ol>
-    </div>
+          <label class="form-label">Channel Access Token</label>
+          <textarea class="form-input" id="line-token" placeholder="右の画面から「コピー」→ ここに貼り付け"></textarea>
 
-    <label class="form-label">Channel Access Token</label>
-    <textarea class="form-input" id="line-token" placeholder="ここにトークンを貼り付け..."></textarea>
+          <div class="status" id="status-1"></div>
 
-    <div class="status" id="status-1"></div>
-
-    <div class="btn-row">
-      <div></div>
-      <button class="btn btn-primary" id="btn-test-1" onclick="testStep1()">接続テスト＆保存</button>
+          <div class="btn-row">
+            <div></div>
+            <button class="btn btn-primary" id="btn-test-1" onclick="testStep1()">接続テスト＆保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="step-right">
+        <div class="mock-console">
+          <div class="mock-console-header">
+            <div class="mock-console-dot r"></div>
+            <div class="mock-console-dot y"></div>
+            <div class="mock-console-dot g"></div>
+            <div class="mock-console-url">developers.line.biz/console/channel/123456</div>
+          </div>
+          <div class="mock-console-body">
+            <div class="mock-notice">デモ用の模擬画面です。<br>実際は <a href="https://developers.line.biz/console/" target="_blank" style="color:#92400e;font-weight:700;">LINE Developers</a> をブラウザで開いてください。</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:#06c755;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;">CP</div>
+              <div>
+                <div style="font-size:14px;font-weight:700;">CalPush Bot</div>
+                <div style="font-size:11px;color:#94a3b8;">Messaging API</div>
+              </div>
+            </div>
+            <div class="line-mock-nav">
+              <div class="line-mock-tab">チャネル基本設定</div>
+              <div class="line-mock-tab active">Messaging API設定</div>
+            </div>
+            <div class="line-mock-section">
+              <div class="line-mock-label">Channel ID</div>
+              <div class="line-mock-field">2001234567</div>
+            </div>
+            <div class="line-mock-section">
+              <div class="line-mock-label">チャネルアクセストークン（長期）</div>
+              <div class="line-mock-field long">eyJhbGciOiJIUzI1NiJ9.demo_token_calpush_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.signature</div>
+              <button class="mock-copy-btn" id="line-copy-btn" onclick="copyMockToken()">コピーして左に貼り付け</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Step 2: Google Calendar 接続 -->
-  <div class="panel" id="step-2" style="display:none;">
-    <div class="panel-title">Step 2: Google Calendar 接続</div>
-    <div class="panel-desc">通知対象の Google カレンダー ID を入力してください。</div>
+  <div id="step-2" style="display:none;">
+    <div class="step-layout">
+      <div class="step-left">
+        <div class="panel">
+          <div class="panel-title">Step 2: Google Calendar 接続</div>
+          <div class="panel-desc">右の Google Calendar 設定画面からカレンダー ID をコピーして貼り付けてください。</div>
 
-    <button class="guide-toggle" onclick="toggleGuide('guide-2')">
-      <span class="guide-arrow" id="arrow-guide-2">&#9654;</span>
-      カレンダー ID の確認方法を見る
-    </button>
-    <div class="guide-content" id="guide-2">
-      <ol>
-        <li><a href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener">Google カレンダー設定</a> を開く</li>
-        <li>左メニューから対象のカレンダーを選択</li>
-        <li>「カレンダーの統合」セクションまでスクロール</li>
-        <li>「カレンダー ID」をコピー（例: example@gmail.com）</li>
-      </ol>
-    </div>
+          <label class="form-label">Calendar ID</label>
+          <input type="text" class="form-input" id="calendar-id" placeholder="右の画面から「コピー」→ ここに貼り付け">
 
-    <label class="form-label">Calendar ID</label>
-    <input type="text" class="form-input" id="calendar-id" placeholder="your-email@gmail.com">
+          <div class="status" id="status-2"></div>
 
-    <div class="status" id="status-2"></div>
-
-    <div class="btn-row">
-      <button class="btn btn-back" onclick="goToStep(1)">&larr; 戻る</button>
-      <button class="btn btn-primary" id="btn-test-2" onclick="testStep2()">接続テスト＆保存</button>
+          <div class="btn-row">
+            <button class="btn btn-back" onclick="goToStep(1)">&larr; 戻る</button>
+            <button class="btn btn-primary" id="btn-test-2" onclick="testStep2()">接続テスト＆保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="step-right">
+        <div class="mock-console">
+          <div class="mock-console-header">
+            <div class="mock-console-dot r"></div>
+            <div class="mock-console-dot y"></div>
+            <div class="mock-console-dot g"></div>
+            <div class="mock-console-url">calendar.google.com/calendar/r/settings</div>
+          </div>
+          <div class="mock-console-body">
+            <div class="mock-notice">デモ用の模擬画面です。<br>実際は <a href="https://calendar.google.com/calendar/r/settings" target="_blank" style="color:#92400e;font-weight:700;">Google Calendar 設定</a> をブラウザで開いてください。</div>
+            <div class="gcal-mock-breadcrumb">設定 &gt; <span>マイカレンダー</span> &gt; <span>メインカレンダー</span></div>
+            <div class="gcal-mock-section">
+              <div class="gcal-mock-heading">カレンダーの統合</div>
+              <div style="font-size:12px;color:#64748b;margin-bottom:8px;">このカレンダーにアクセスするためのアドレスです。</div>
+              <div class="gcal-mock-row">
+                <div>
+                  <div class="cal-name">カレンダー ID</div>
+                  <div class="cal-id" id="mock-cal-id">demo-user@gmail.com</div>
+                </div>
+                <button class="gcal-copy-btn" id="gcal-copy-btn" onclick="copyMockCalId()">コピーして左に貼り付け</button>
+              </div>
+            </div>
+            <div class="gcal-mock-section" style="margin-top:16px;">
+              <div class="gcal-mock-heading">カレンダーの名前</div>
+              <div style="font-size:13px;color:#475569;padding:8px 0;">マイカレンダー</div>
+            </div>
+            <div class="gcal-mock-section">
+              <div class="gcal-mock-heading">タイムゾーン</div>
+              <div style="font-size:13px;color:#475569;padding:8px 0;">(GMT+09:00) 日本標準時 - 東京</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Step 3: 自動通知を有効化 -->
-  <div class="panel" id="step-3" style="display:none;">
+  <div class="panel" id="step-3" style="display:none;max-width:600px;margin:0 auto;">
     <div class="panel-title">Step 3: 自動通知を有効化</div>
     <div class="panel-desc">以下の自動通知トリガーを設定します。</div>
 
@@ -231,7 +327,7 @@
   </div>
 
   <!-- Step 4: LINE Webhook を設定 -->
-  <div class="panel" id="step-4" style="display:none;">
+  <div class="panel" id="step-4" style="display:none;max-width:600px;margin:0 auto;">
     <div class="panel-title">Step 4: LINE Webhook を設定</div>
     <div class="panel-desc">以下の Webhook URL を LINE Developers に登録してください。</div>
 
@@ -257,7 +353,7 @@
   </div>
 
   <!-- Step 5: 完了＆テスト -->
-  <div class="panel" id="step-5" style="display:none;">
+  <div class="panel" id="step-5" style="display:none;max-width:600px;margin:0 auto;">
     <div class="completion">
       <div class="completion-emoji">&#127881;</div>
       <div class="completion-title">セットアップ完了！</div>
@@ -352,6 +448,26 @@
       el.classList.add('show');
       arrow.classList.add('open');
     }
+  }
+
+  // Mock copy: LINE token → left input
+  function copyMockToken() {
+    var token = 'eyJhbGciOiJIUzI1NiJ9.demo_token_calpush_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.signature';
+    document.getElementById('line-token').value = token;
+    var btn = document.getElementById('line-copy-btn');
+    btn.textContent = '貼り付けました！';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'コピーして左に貼り付け'; btn.classList.remove('copied'); }, 2000);
+  }
+
+  // Mock copy: Calendar ID → left input
+  function copyMockCalId() {
+    var calId = 'demo-user@gmail.com';
+    document.getElementById('calendar-id').value = calId;
+    var btn = document.getElementById('gcal-copy-btn');
+    btn.textContent = '貼り付けました！';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'コピーして左に貼り付け'; btn.classList.remove('copied'); }, 2000);
   }
 
   // Step 1: LINE Bot test
