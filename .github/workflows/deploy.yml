@@ -1,0 +1,48 @@
+name: Deploy to Google Apps Script
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Code.js'
+      - 'admin.html'
+      - 'appsscript.json'
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'デプロイの説明'
+        required: false
+        default: 'CalPush deploy via GitHub Actions'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Write clasp credentials
+        run: |
+          echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+
+      - name: Write .clasp.json
+        run: |
+          echo '{"scriptId":"${{ secrets.CLASP_SCRIPTID }}","rootDir":"."}' > .clasp.json
+
+      - name: Push to Google Apps Script
+        run: clasp push --force
+
+      - name: Deploy as Web App
+        run: |
+          DESCRIPTION="${{ github.event.inputs.description || format('Deploy from commit {0}', github.sha) }}"
+          clasp deploy --description "$DESCRIPTION"
+          echo "✅ デプロイ完了"
