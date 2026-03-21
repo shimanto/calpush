@@ -5,156 +5,536 @@ export function landingPage(): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CalPush Cloud - Google Calendar × LINE 通知</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --pink: #ff6b9d;
+      --purple: #c084fc;
+      --blue: #60a5fa;
+      --mint: #6ee7b7;
+      --yellow: #fbbf24;
+      --peach: #fda4af;
+      --bg: #fefcfb;
+      --card-bg: #ffffff;
+      --text: #3d3250;
+      --text-sub: #8b7fa8;
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #333; line-height: 1.6; }
-    .hero { text-align: center; padding: 80px 20px 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
-    .hero h1 { font-size: 2.5rem; margin-bottom: 16px; }
-    .hero p { font-size: 1.2rem; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
-    .btn { display: inline-block; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem; transition: transform 0.1s; }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-google { background: #fff; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-    .features { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
-    .features h2 { text-align: center; font-size: 1.8rem; margin-bottom: 40px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
-    .card { background: #f8f9fa; border-radius: 12px; padding: 24px; }
-    .card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-    .card p { color: #666; font-size: 0.95rem; }
-    .pricing { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
-    .pricing h2 { text-align: center; font-size: 1.8rem; margin-bottom: 40px; }
-    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
-    .pricing-card { border: 1px solid #e0e0e0; border-radius: 12px; padding: 32px 24px; text-align: center; }
-    .pricing-card.popular { border-color: #667eea; box-shadow: 0 4px 12px rgba(102,126,234,0.2); position: relative; }
-    .pricing-card.popular::before { content: '人気'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #667eea; color: #fff; padding: 2px 16px; border-radius: 12px; font-size: 0.8rem; }
-    .pricing-card h3 { font-size: 1.3rem; margin-bottom: 8px; }
-    .pricing-card .price { font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 4px; }
-    .pricing-card .price-sub { font-size: 0.85rem; color: #999; margin-bottom: 16px; }
-    .pricing-card ul { list-style: none; text-align: left; }
-    .pricing-card ul li { padding: 6px 0; font-size: 0.9rem; }
-    .pricing-card ul li::before { content: '✓ '; color: #4caf50; font-weight: 700; }
-    .steps { max-width: 700px; margin: 0 auto; padding: 60px 20px; }
-    .steps h2 { text-align: center; font-size: 1.8rem; margin-bottom: 40px; }
-    .step { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
-    .step-num { width: 36px; height: 36px; border-radius: 50%; background: #667eea; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
-    .step-text h3 { font-size: 1rem; }
-    .step-text p { color: #666; font-size: 0.9rem; }
-    footer { text-align: center; padding: 40px 20px; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; }
-    footer a { color: #667eea; text-decoration: none; }
+    body {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      color: var(--text);
+      line-height: 1.7;
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+
+    /* --- Navigation --- */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      padding: 12px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo { font-weight: 800; font-size: 1.3rem; color: var(--pink); letter-spacing: -0.5px; }
+    .logo span { color: var(--purple); }
+    nav a.nav-cta {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: #fff; padding: 8px 20px; border-radius: 50px;
+      text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    nav a.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,107,157,0.35); }
+
+    /* --- Hero --- */
+    .hero {
+      text-align: center;
+      padding: 140px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 20% 50%, rgba(192,132,252,0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 350px at 80% 30%, rgba(255,107,157,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 300px at 60% 80%, rgba(96,165,250,0.1) 0%, transparent 70%);
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-block; background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #92400e; padding: 6px 18px; border-radius: 50px;
+      font-size: 0.85rem; font-weight: 600; margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.3;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-sub);
+      max-width: 520px;
+      margin: 0 auto 36px;
+    }
+    .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 36px; border-radius: 50px;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: #fff; text-decoration: none; font-weight: 700; font-size: 1.05rem;
+      box-shadow: 0 4px 20px rgba(255,107,157,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,157,0.4); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 36px; border-radius: 50px;
+      background: var(--card-bg); color: var(--text);
+      text-decoration: none; font-weight: 600; font-size: 1.05rem;
+      border: 2px solid #e5e0f0;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--purple); transform: translateY(-1px); }
+
+    /* --- Phone Mockup --- */
+    .mockup-section {
+      max-width: 900px; margin: -20px auto 0; padding: 0 24px;
+      display: flex; justify-content: center; position: relative; z-index: 2;
+    }
+    .phone-frame {
+      width: 320px; background: #1a1a2e; border-radius: 36px;
+      padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .phone-screen {
+      background: #f0f4f3; border-radius: 26px; padding: 20px 16px;
+      font-size: 0.82rem; min-height: 400px;
+    }
+    .phone-header {
+      text-align: center; font-size: 0.75rem; color: #999;
+      margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .chat-bubble {
+      max-width: 85%; padding: 10px 14px; border-radius: 16px;
+      margin-bottom: 10px; line-height: 1.5; font-size: 0.82rem;
+      animation: fadeInUp 0.5s ease-out both;
+    }
+    .chat-bubble.bot {
+      background: #fff; color: #333; border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chat-bubble.user {
+      background: #06c755; color: #fff; margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble:nth-child(2) { animation-delay: 0.3s; }
+    .chat-bubble:nth-child(3) { animation-delay: 0.8s; }
+    .chat-bubble:nth-child(4) { animation-delay: 1.5s; }
+    .chat-bubble:nth-child(5) { animation-delay: 2.0s; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Section Title --- */
+    .section-title {
+      text-align: center;
+      padding: 80px 24px 40px;
+    }
+    .section-title .label {
+      display: inline-block; font-size: 0.85rem; font-weight: 600;
+      color: var(--purple); background: rgba(192,132,252,0.1);
+      padding: 4px 16px; border-radius: 50px; margin-bottom: 12px;
+    }
+    .section-title h2 {
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 800; letter-spacing: -0.5px;
+    }
+    .section-title p { color: var(--text-sub); margin-top: 8px; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+    /* --- Features --- */
+    .features { max-width: 1000px; margin: 0 auto; padding: 0 24px 60px; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 16px;
+    }
+    .feature-card:nth-child(1) .feature-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .feature-card:nth-child(2) .feature-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+    .feature-card:nth-child(3) .feature-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+    .feature-card:nth-child(4) .feature-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+    .feature-card:nth-child(5) .feature-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+    .feature-card:nth-child(6) .feature-icon { background: linear-gradient(135deg, #ffe4e6, #fecdd3); }
+    .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { color: var(--text-sub); font-size: 0.92rem; }
+
+    /* --- How it works --- */
+    .steps { max-width: 640px; margin: 0 auto; padding: 0 24px 80px; }
+    .step {
+      display: flex; gap: 20px; align-items: flex-start;
+      margin-bottom: 32px; position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: ''; position: absolute;
+      left: 27px; top: 56px; bottom: -20px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--purple), rgba(192,132,252,0.1));
+    }
+    .step-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .step:nth-child(1) .step-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+    .step:nth-child(2) .step-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+    .step:nth-child(3) .step-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+    .step-text { padding-top: 6px; }
+    .step-text h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+    .step-text p { color: var(--text-sub); font-size: 0.92rem; }
+
+    /* --- Pricing --- */
+    .pricing { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 20px;
+    }
+    .pricing-card {
+      background: var(--card-bg);
+      border: 2px solid #f0edf5;
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+    .pricing-card.popular {
+      border-color: var(--purple);
+      background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+      box-shadow: 0 8px 30px rgba(192,132,252,0.15);
+      position: relative;
+    }
+    .pricing-card.popular::before {
+      content: 'おすすめ';
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: #fff; padding: 4px 20px; border-radius: 50px;
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .pricing-card .plan-icon { font-size: 2rem; margin-bottom: 8px; }
+    .pricing-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+    .pricing-card .price {
+      font-size: 2.2rem; font-weight: 800; margin-bottom: 2px;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .pricing-card .price-sub { font-size: 0.82rem; color: var(--text-sub); margin-bottom: 20px; }
+    .pricing-card ul { list-style: none; text-align: left; margin-bottom: 24px; }
+    .pricing-card ul li { padding: 7px 0; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+    .pricing-card ul li .check {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; flex-shrink: 0;
+    }
+    .pricing-card .btn-plan {
+      display: block; padding: 12px; border-radius: 50px;
+      font-weight: 700; font-size: 0.95rem; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .pricing-card .btn-plan.free {
+      background: #f3f0f8; color: var(--purple);
+    }
+    .pricing-card .btn-plan.pro {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: #fff; box-shadow: 0 4px 16px rgba(192,132,252,0.3);
+    }
+    .pricing-card .btn-plan.biz {
+      background: var(--text); color: #fff;
+    }
+    .pricing-card .btn-plan:hover { transform: translateY(-2px); }
+
+    /* --- LINE Demo Section --- */
+    .demo-section {
+      background: linear-gradient(180deg, #faf5ff 0%, var(--bg) 100%);
+      padding: 60px 24px;
+    }
+    .demo-inner {
+      max-width: 800px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+    }
+    .demo-text h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.5px; }
+    .demo-text p { color: var(--text-sub); margin-bottom: 16px; }
+    .demo-commands {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .demo-cmd {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; padding: 10px 16px; border-radius: var(--radius-sm);
+      border: 1px solid #f0edf5; font-size: 0.9rem;
+    }
+    .demo-cmd .cmd-icon { font-size: 1.1rem; }
+    .demo-cmd code {
+      background: rgba(192,132,252,0.1); color: var(--purple);
+      padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;
+    }
+
+    /* --- CTA Section --- */
+    .cta-section {
+      text-align: center; padding: 80px 24px;
+      background: linear-gradient(135deg, rgba(255,107,157,0.06), rgba(192,132,252,0.06));
+    }
+    .cta-section h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 800; margin-bottom: 12px;
+    }
+    .cta-section p { color: var(--text-sub); margin-bottom: 32px; }
+
+    /* --- Footer --- */
+    footer {
+      text-align: center; padding: 40px 24px;
+      color: var(--text-sub); font-size: 0.82rem;
+    }
+    footer a { color: var(--purple); text-decoration: none; }
+    footer .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 12px; }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .demo-inner { grid-template-columns: 1fr; text-align: center; }
+      .demo-commands { max-width: 320px; margin: 0 auto; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+    }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <h1>CalPush Cloud</h1>
-    <p>Google Calendar の予定を LINE に自動通知。3分で設定完了、ゼロ円から始められます。</p>
-    <a href="/auth/google" class="btn btn-google">Googleでログイン</a>
-  </div>
+  <nav>
+    <div class="logo">Cal<span>Push</span></div>
+    <a href="/auth/google" class="nav-cta">無料で始める</a>
+  </nav>
 
-  <div class="features">
-    <h2>主な機能</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>朝のスケジュール通知</h3>
-        <p>毎朝8:55に今日の予定をLINEでお届け。一日の見通しが立ちます。</p>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Google Calendar + LINE = 最強の通知体験</div>
+      <h1>予定を忘れない毎日を、<br><span class="gradient">CalPush</span> ではじめよう</h1>
+      <p>Google Calendar の予定を LINE に自動通知。<br>3分で設定完了、ずっと無料で使えます。</p>
+      <div class="hero-buttons">
+        <a href="/auth/google" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Googleでログイン
+        </a>
+        <a href="#features" class="btn-secondary">くわしく見る</a>
       </div>
-      <div class="card">
-        <h3>5分前リマインダー</h3>
-        <p>予定の5分前に自動通知。会議の遅刻を防ぎます。</p>
-      </div>
-      <div class="card">
-        <h3>LINEコマンド</h3>
-        <p>「今日の予定」「明日の予定」とLINEで送るだけで予定を確認。</p>
-      </div>
-      <div class="card">
-        <h3>仮予約管理</h3>
-        <p>仮予約の作成・確定・解放をワンクリックで。ダブルブッキングを防止。</p>
-      </div>
-      <div class="card">
-        <h3>簡単セットアップ</h3>
-        <p>Googleログイン → LINE接続 → 完了。コード編集は一切不要。</p>
-      </div>
-      <div class="card">
-        <h3>完全無料で利用可能</h3>
-        <p>Freeプランは月200通まで無料。個人利用なら十分です。</p>
+    </div>
+  </section>
+
+  <!-- Phone Mockup -->
+  <div class="mockup-section">
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="phone-header">CalPush Bot</div>
+        <div class="chat-bubble user">今日の予定</div>
+        <div class="chat-bubble bot">
+          <div style="margin-bottom:6px;font-weight:600">📅 3/21（金）の予定</div>
+          <div>🕐 10:00〜11:00 チームMTG</div>
+          <div>🕐 13:00〜14:30 クライアント打合せ</div>
+          <div>🕐 16:00〜17:00 1on1</div>
+          <div style="margin-top:6px;color:#999">合計 3 件</div>
+        </div>
+        <div class="chat-bubble bot">⏰ まもなく開始<br><br>🕐 10:00〜 チームMTG</div>
+        <div class="chat-bubble user">予定追加 3/25 15:00-16:00 デザインレビュー</div>
+        <div class="chat-bubble bot">✅ 予定を追加しました<br><br>📅 2026-03-25<br>🕐 15:00〜16:00<br>📝 デザインレビュー</div>
       </div>
     </div>
   </div>
 
-  <div class="pricing">
-    <h2>料金プラン</h2>
-    <div class="pricing-grid">
-      <div class="pricing-card">
-        <h3>Free</h3>
-        <div class="price">¥0</div>
-        <div class="price-sub">ずっと無料</div>
-        <ul>
-          <li>1カレンダー</li>
-          <li>月200通の通知</li>
-          <li>朝のスケジュール通知</li>
-          <li>5分前リマインダー</li>
-          <li>LINEコマンド</li>
-          <li>仮予約管理（5件/月）</li>
-        </ul>
-        <div style="margin-top:24px"><a href="/auth/google" class="btn btn-google" style="padding:10px 24px;font-size:0.9rem">無料で始める</a></div>
-      </div>
-      <div class="pricing-card popular">
-        <h3>Pro</h3>
-        <div class="price">¥480<span style="font-size:1rem;font-weight:400">/月</span></div>
-        <div class="price-sub">年払い ¥3,980/年</div>
-        <ul>
-          <li>5カレンダー</li>
-          <li>無制限の通知</li>
-          <li>通知時刻カスタマイズ</li>
-          <li>リマインダー時刻変更</li>
-          <li>無制限の仮予約</li>
-          <li>14日先の空き枠検索</li>
-          <li>優先サポート</li>
-        </ul>
-        <div style="margin-top:24px"><a href="/auth/google" class="btn" style="padding:10px 24px;font-size:0.9rem;color:#fff;text-decoration:none">Proで始める</a></div>
-      </div>
-      <div class="pricing-card">
-        <h3>Business</h3>
-        <div class="price">¥1,980<span style="font-size:1rem;font-weight:400">/月</span></div>
-        <div class="price-sub">5名まで、追加 ¥300/名</div>
-        <ul>
-          <li>無制限カレンダー</li>
-          <li>チーム共有カレンダー</li>
-          <li>メンバー空き時間検索</li>
-          <li>仮予約の承認フロー</li>
-          <li>Webhook / Zapier連携</li>
-          <li>管理者ダッシュボード</li>
-        </ul>
-        <div style="margin-top:24px"><a href="mailto:hello@calpush.com" class="btn btn-google" style="padding:10px 24px;font-size:0.9rem">お問い合わせ</a></div>
+  <!-- Features -->
+  <div id="features">
+    <div class="section-title">
+      <div class="label">できること</div>
+      <h2>シンプルだけど、しっかり便利</h2>
+      <p>毎日のスケジュール管理をもっとラクに</p>
+    </div>
+    <div class="features">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌅</div>
+          <h3>朝のスケジュール通知</h3>
+          <p>毎朝8:55に今日の予定をLINEでお届け。出かける前にサッと確認できます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⏰</div>
+          <h3>リマインダー通知</h3>
+          <p>予定の5分前に自動通知。もう「会議忘れてた！」はなくなります。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3>LINEコマンド</h3>
+          <p>「今日の予定」って送るだけ。LINEから予定の追加・削除もできちゃいます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>仮予約管理</h3>
+          <p>仮予約の作成・確定・解放をワンタップで。ダブルブッキングも安心です。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🪄</div>
+          <h3>3分でセットアップ</h3>
+          <p>Googleでログイン → LINE接続 → 完了！難しい設定は一切ありません。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎁</div>
+          <h3>無料で使える</h3>
+          <p>月200通まで完全無料。個人利用ならFreeプランでずっと使えます。</p>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- LINE Demo -->
+  <section class="demo-section">
+    <div class="demo-inner">
+      <div class="demo-text">
+        <h2>LINEで予定管理が<br>こんなにカンタン</h2>
+        <p>いつも使っているLINEから、テキストを送るだけで予定を確認・追加・削除。専用アプリのインストールは不要です。</p>
+      </div>
+      <div class="demo-commands">
+        <div class="demo-cmd"><span class="cmd-icon">📅</span> <code>今日の予定</code> <span style="color:#999;font-size:0.82rem">→ 今日のスケジュール表示</span></div>
+        <div class="demo-cmd"><span class="cmd-icon">📆</span> <code>明日の予定</code> <span style="color:#999;font-size:0.82rem">→ 明日のスケジュール表示</span></div>
+        <div class="demo-cmd"><span class="cmd-icon">➕</span> <code>予定追加 4/1 10:00-11:00 会議</code></div>
+        <div class="demo-cmd"><span class="cmd-icon">🗑️</span> <code>予定削除 4/1 会議</code></div>
+        <div class="demo-cmd"><span class="cmd-icon">📊</span> <code>利用状況</code> <span style="color:#999;font-size:0.82rem">→ 通知残数を確認</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <div class="section-title">
+    <div class="label">はじめかた</div>
+    <h2>たった3ステップで完了</h2>
+  </div>
   <div class="steps">
-    <h2>セットアップは3ステップ</h2>
     <div class="step">
-      <div class="step-num">1</div>
+      <div class="step-icon">🔐</div>
       <div class="step-text">
-        <h3>Googleでログイン</h3>
+        <h3>Step 1: Googleでログイン</h3>
         <p>Googleアカウントで認証するだけ。カレンダーの読み取り権限を許可します。</p>
       </div>
     </div>
     <div class="step">
-      <div class="step-num">2</div>
+      <div class="step-icon">💚</div>
       <div class="step-text">
-        <h3>LINE公式アカウントを接続</h3>
-        <p>ウィザードに従ってChannel IDとChannel Secretを入力。Webhook URLは自動生成されます。</p>
+        <h3>Step 2: LINEを接続</h3>
+        <p>ウィザードに従ってChannel IDとSecretを入力。Webhook URLは自動生成されます。</p>
       </div>
     </div>
     <div class="step">
-      <div class="step-num">3</div>
+      <div class="step-icon">🎉</div>
       <div class="step-text">
-        <h3>通知開始</h3>
-        <p>設定完了。翌朝から自動でスケジュール通知が届きます。</p>
+        <h3>Step 3: 通知スタート！</h3>
+        <p>これで完了！翌朝から自動でスケジュール通知がLINEに届きます。</p>
       </div>
     </div>
   </div>
 
+  <!-- Pricing -->
+  <div class="section-title" id="pricing">
+    <div class="label">料金</div>
+    <h2>あなたにぴったりのプラン</h2>
+    <p>まずは無料で試してみてください</p>
+  </div>
+  <div class="pricing">
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="plan-icon">🌱</div>
+        <h3>Free</h3>
+        <div class="price">¥0</div>
+        <div class="price-sub">ずっと無料</div>
+        <ul>
+          <li><span class="check">✓</span> 1カレンダー</li>
+          <li><span class="check">✓</span> 月200通の通知</li>
+          <li><span class="check">✓</span> 朝のスケジュール通知</li>
+          <li><span class="check">✓</span> 5分前リマインダー</li>
+          <li><span class="check">✓</span> LINEコマンド</li>
+        </ul>
+        <a href="/auth/google" class="btn-plan free">無料で始める</a>
+      </div>
+      <div class="pricing-card popular">
+        <div class="plan-icon">✨</div>
+        <h3>Pro</h3>
+        <div class="price">¥480<span style="font-size:1rem;font-weight:400">/月</span></div>
+        <div class="price-sub">年払い ¥3,980/年でお得に</div>
+        <ul>
+          <li><span class="check">✓</span> 5カレンダー</li>
+          <li><span class="check">✓</span> 通知無制限</li>
+          <li><span class="check">✓</span> 通知時刻カスタマイズ</li>
+          <li><span class="check">✓</span> リマインダー時刻変更</li>
+          <li><span class="check">✓</span> 無制限の仮予約</li>
+          <li><span class="check">✓</span> 14日先の空き枠検索</li>
+        </ul>
+        <a href="/auth/google" class="btn-plan pro">Proで始める</a>
+      </div>
+      <div class="pricing-card">
+        <div class="plan-icon">🏢</div>
+        <h3>Business</h3>
+        <div class="price">¥1,980<span style="font-size:1rem;font-weight:400">/月</span></div>
+        <div class="price-sub">5名まで、追加 ¥300/名</div>
+        <ul>
+          <li><span class="check">✓</span> 無制限カレンダー</li>
+          <li><span class="check">✓</span> チーム共有カレンダー</li>
+          <li><span class="check">✓</span> メンバー空き時間検索</li>
+          <li><span class="check">✓</span> 仮予約の承認フロー</li>
+          <li><span class="check">✓</span> Webhook / Zapier連携</li>
+        </ul>
+        <a href="mailto:hello@calpush.com" class="btn-plan biz">お問い合わせ</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>今日から、予定の心配をなくそう</h2>
+    <p>3分のセットアップで明日の朝から通知が届きます</p>
+    <a href="/auth/google" class="btn-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      無料で始める
+    </a>
+  </section>
+
   <footer>
-    <p>CalPush Cloud &copy; 2026 &nbsp;|&nbsp; <a href="/privacy">プライバシーポリシー</a> &nbsp;|&nbsp; <a href="https://github.com/shimanto/calpush">GitHub (OSS版)</a></p>
+    <div class="footer-links">
+      <a href="/privacy">プライバシーポリシー</a>
+      <a href="https://github.com/shimanto/calpush">GitHub</a>
+    </div>
+    <p>CalPush Cloud &copy; 2026</p>
   </footer>
 </body>
 </html>`;
