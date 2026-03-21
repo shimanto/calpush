@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CalPush - Google Calendar × LINE 通知を5分でセットアップ</title>
+  <meta name="description" content="CalPush は Google カレンダーと Gmail の通知を LINE に届けるオープンソースツール。GAS だけで動作、サーバー不要・完全無料。">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; color: #1e293b; line-height: 1.7; }
+
+    /* Header */
+    .header { position: fixed; top: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; z-index: 100; }
+    .header-inner { max-width: 1100px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .header-logo { height: 36px; }
+    .header-nav { display: flex; align-items: center; gap: 24px; }
+    .header-nav a { text-decoration: none; color: #475569; font-size: 14px; font-weight: 500; }
+    .header-nav a:hover { color: #4f46e5; }
+    .btn-gh { display: inline-flex; align-items: center; gap: 6px; background: #1e293b; color: #fff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s; }
+    .btn-gh:hover { background: #334155; }
+    .btn-gh svg { width: 18px; height: 18px; fill: #fff; }
+
+    /* Hero */
+    .hero { padding: 140px 24px 80px; text-align: center; background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); }
+    .hero-logo { height: 64px; margin-bottom: 24px; }
+    .hero h1 { font-size: 44px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+    .hero h1 .accent { color: #4f46e5; }
+    .hero h1 .line-accent { color: #06C755; }
+    .hero p { font-size: 18px; color: #64748b; max-width: 600px; margin: 0 auto 32px; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #4f46e5; color: #fff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 600; transition: all 0.2s; box-shadow: 0 4px 14px rgba(79,70,229,0.3); }
+    .btn-primary:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.35); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #1e293b; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 600; border: 1px solid #e2e8f0; transition: all 0.2s; }
+    .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .hero-badges { margin-top: 32px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; color: #475569; border: 1px solid #e2e8f0; }
+
+    /* Section */
+    .section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 48px; }
+    .section-header h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+    .section-header p { font-size: 16px; color: #64748b; }
+    .section-label { display: inline-block; background: #eef2ff; color: #4f46e5; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.5px; }
+
+    /* Features */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .feature-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; transition: all 0.2s; }
+    .feature-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 24px rgba(79,70,229,0.06); transform: translateY(-2px); }
+    .feature-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+    .fi-indigo { background: #eef2ff; }
+    .fi-green { background: #ecfdf5; }
+    .fi-amber { background: #fffbeb; }
+    .fi-blue { background: #eff6ff; }
+    .fi-rose { background: #fff1f2; }
+    .fi-purple { background: #faf5ff; }
+    .feature-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: #64748b; line-height: 1.6; }
+
+    /* How it works */
+    .bg-light { background: #f8fafc; }
+    .steps { display: flex; gap: 32px; }
+    .step { flex: 1; text-align: center; position: relative; }
+    .step-num { width: 48px; height: 48px; border-radius: 50%; background: #4f46e5; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: #64748b; }
+    .step-arrow { position: absolute; top: 24px; right: -20px; color: #cbd5e1; font-size: 24px; }
+
+    /* Screenshot / Demo */
+    .demo-section { padding: 80px 24px; background: linear-gradient(180deg, #fff 0%, #f8fafc 100%); }
+    .demo-inner { max-width: 1000px; margin: 0 auto; }
+    .demo-mockup { background: #1e293b; border-radius: 12px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); margin-top: 40px; }
+    .demo-topbar { background: #334155; border-radius: 8px 8px 0 0; padding: 10px 16px; display: flex; gap: 6px; }
+    .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .demo-dot.r { background: #f87171; }
+    .demo-dot.y { background: #fbbf24; }
+    .demo-dot.g { background: #4ade80; }
+    .demo-content { background: #f8fafc; border-radius: 0 0 8px 8px; min-height: 300px; display: flex; }
+    .demo-sidebar { width: 200px; background: #1e293b; padding: 20px 0; border-radius: 0 0 0 8px; }
+    .demo-sidebar-item { padding: 8px 20px; color: #94a3b8; font-size: 13px; }
+    .demo-sidebar-item.active { color: #fff; background: #334155; border-left: 3px solid #818cf8; }
+    .demo-main { flex: 1; padding: 20px; }
+    .demo-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .demo-card-title { font-size: 11px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; }
+    .demo-event { font-size: 12px; padding: 6px 8px; border-left: 3px solid #4f46e5; background: #eef2ff; border-radius: 4px; margin-bottom: 4px; }
+    .demo-event.tentative { border-left-color: #f59e0b; background: #fffbeb; }
+
+    /* Comparison */
+    .comparison-table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    .comparison-table th, .comparison-table td { padding: 14px 20px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+    .comparison-table th { background: #f8fafc; font-weight: 600; color: #475569; }
+    .comparison-table td:first-child { font-weight: 500; }
+    .check { color: #059669; font-weight: 700; }
+    .cross { color: #dc2626; }
+    .highlight-col { background: #eef2ff; }
+
+    /* CTA */
+    .cta { padding: 80px 24px; text-align: center; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; }
+    .cta h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+    .cta p { font-size: 16px; opacity: 0.9; margin-bottom: 32px; }
+    .btn-white { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #4f46e5; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+    .btn-white:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
+    /* Footer */
+    .footer { background: #1e293b; color: #94a3b8; padding: 40px 24px; text-align: center; }
+    .footer a { color: #818cf8; text-decoration: none; }
+    .footer a:hover { color: #a5b4fc; }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; font-size: 14px; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 28px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { flex-direction: column; gap: 24px; }
+      .step-arrow { display: none; }
+      .demo-sidebar { display: none; }
+      .comparison-table { font-size: 12px; }
+      .comparison-table th, .comparison-table td { padding: 8px 10px; }
+      .header-nav a:not(.btn-gh) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <img src="assets/logo.svg" alt="CalPush" class="header-logo">
+    <nav class="header-nav">
+      <a href="#features">機能</a>
+      <a href="#howto">使い方</a>
+      <a href="#demo">画面</a>
+      <a href="https://github.com/shimanto/calpush" class="btn-gh">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <img src="assets/logo.svg" alt="CalPush" class="hero-logo">
+  <h1>
+    <span class="accent">Google Calendar</span> × <span class="line-accent">LINE</span><br>
+    通知を5分でセットアップ
+  </h1>
+  <p>予定通知・リマインダー・メール着信通知を LINE に届ける。<br>サーバー不要、GAS だけで動く完全無料のオープンソースツール。</p>
+  <div class="hero-actions">
+    <a href="https://github.com/shimanto/calpush" class="btn-primary">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub で始める
+    </a>
+    <a href="#howto" class="btn-secondary">セットアップ手順を見る</a>
+  </div>
+  <div class="hero-badges">
+    <span class="badge">&#9989; 完全無料</span>
+    <span class="badge">&#128274; サーバー不要</span>
+    <span class="badge">&#128640; 5分でセットアップ</span>
+    <span class="badge">&#128421; オープンソース</span>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="section-header">
+    <span class="section-label">FEATURES</span>
+    <h2>CalPush でできること</h2>
+    <p>日々のスケジュール管理をLINEで完結</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon fi-indigo">&#128197;</div>
+      <h3>毎朝の予定通知</h3>
+      <p>毎日 8:55 に当日のスケジュールを LINE に自動送信。朝の予定確認が一目で完了。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-amber">&#9200;</div>
+      <h3>5分前リマインダー</h3>
+      <p>会議やイベント開始の5分前に LINE でお知らせ。うっかり忘れを防止します。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-green">&#128232;</div>
+      <h3>メール着信通知</h3>
+      <p>指定したドメインやアドレスからのメールを検知し、LINE に即時通知。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">&#128172;</div>
+      <h3>LINE からスケジュール操作</h3>
+      <p>「今日の予定」「予定追加」などのチャットコマンドで手軽に操作。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-purple">&#128187;</div>
+      <h3>PC 管理ダッシュボード</h3>
+      <p>ブラウザから週間スケジュール管理、メール通知設定、空き枠管理が可能。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-rose">&#128203;</div>
+      <h3>空き枠仮押さえ</h3>
+      <p>候補日時を一括仮押さえ。確定時に他の候補を自動解放するグループ管理機能。</p>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="bg-light" id="howto">
+  <div class="section" style="padding-top:80px;padding-bottom:80px;">
+    <div class="section-header">
+      <span class="section-label">SETUP</span>
+      <h2>スマホだけで5ステップ完了</h2>
+      <p>PC不要。スマートフォンのブラウザだけで CalPush を使い始められます。</p>
+    </div>
+
+    <div class="steps" style="flex-direction:column;gap:0;max-width:640px;margin:0 auto;position:relative;">
+      <!-- 縦線 -->
+      <div style="position:absolute;left:23px;top:24px;bottom:24px;width:3px;background:linear-gradient(to bottom,#4f46e5,#a5b4fc);border-radius:2px;"></div>
+
+      <div style="display:flex;gap:20px;margin-bottom:28px;position:relative;">
+        <div class="step-num" style="flex-shrink:0;z-index:1;">1</div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;flex:1;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">LINE Bot を作成</h3>
+          <p style="font-size:14px;color:#64748b;margin-bottom:8px;">LINE Developers で Messaging API チャネルを作成し、Channel Access Token を発行してコピー。</p>
+          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569;line-height:1.7;">
+            <a href="https://developers.line.biz/console/" target="_blank" style="color:#4f46e5;font-weight:600;">developers.line.biz</a> → 新規プロバイダー → Messaging API → トークン発行
+          </div>
+          <span style="display:inline-block;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:600;padding:2px 10px;border-radius:100px;margin-top:8px;">約 2 分</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:20px;margin-bottom:28px;position:relative;">
+        <div class="step-num" style="flex-shrink:0;z-index:1;">2</div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;flex:1;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">GAS プロジェクトをコピー＆デプロイ</h3>
+          <p style="font-size:14px;color:#64748b;margin-bottom:8px;">GAS エディタでプロジェクトをコピーし、「デプロイ」→「ウェブアプリ」で公開。</p>
+          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569;line-height:1.7;">
+            <a href="https://script.google.com" target="_blank" style="color:#4f46e5;font-weight:600;">script.google.com</a> → コピーを作成 → デプロイ →<br>
+            実行ユーザー: 自分 / アクセス: 全員 →「デプロイ」
+          </div>
+          <span style="display:inline-block;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:600;padding:2px 10px;border-radius:100px;margin-top:8px;">約 2 分</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:20px;margin-bottom:28px;position:relative;">
+        <div class="step-num" style="flex-shrink:0;z-index:1;">3</div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;flex:1;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">セットアップウィザードで初期設定</h3>
+          <p style="font-size:14px;color:#64748b;margin-bottom:8px;">デプロイ URL を開くとウィザードが自動表示。トークンとカレンダー ID を入力するだけ。</p>
+          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569;line-height:1.7;">
+            Step 1: LINE Token を貼り付け（接続テスト自動実行）<br>
+            Step 2: Calendar ID を入力（アクセス確認自動実行）<br>
+            Step 3:「自動通知を有効にする」をタップ<br>
+            Step 4: Webhook URL をコピー
+          </div>
+          <span style="display:inline-block;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:600;padding:2px 10px;border-radius:100px;margin-top:8px;">約 3 分</span>
+          <div style="margin-top:8px;"><a href="setup.html" style="color:#4f46e5;font-weight:600;font-size:13px;">ウィザードのデモを見る →</a></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:20px;margin-bottom:28px;position:relative;">
+        <div class="step-num" style="flex-shrink:0;z-index:1;">4</div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;flex:1;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">LINE Developers で Webhook URL を設定</h3>
+          <p style="font-size:14px;color:#64748b;margin-bottom:8px;">コピーした URL を LINE Developers に貼り付けて Webhook を ON にします。</p>
+          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569;line-height:1.7;">
+            Messaging API 設定 → Webhook URL に貼り付け → 更新 →「Webhookの利用」を ON
+          </div>
+          <span style="display:inline-block;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:600;padding:2px 10px;border-radius:100px;margin-top:8px;">約 1 分</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:20px;position:relative;">
+        <div class="step-num" style="flex-shrink:0;z-index:1;background:#059669;">5</div>
+        <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:20px;flex:1;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;color:#059669;">LINE Bot に「今日の予定」と送信して完了！</h3>
+          <p style="font-size:14px;color:#64748b;">Bot を友だち追加 →「今日の予定」と送信 → 予定一覧が返ってきたらセットアップ完了。User ID が自動保存され、毎朝の通知が届き始めます。</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="max-width:640px;margin:24px auto 0;background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:16px 20px;font-size:14px;color:#3730a3;text-align:center;">
+      <strong>合計 約 8 分。</strong> 通知時刻やリマインダーは管理画面の「設定」タブからいつでも変更できます。
+    </div>
+  </div>
+</section>
+
+<!-- Demo / Screenshot -->
+<section class="demo-section" id="demo">
+  <div class="demo-inner">
+    <div class="section-header">
+      <span class="section-label">DASHBOARD</span>
+      <h2>直感的な管理画面</h2>
+      <p>PC ブラウザからスケジュールを一目で管理</p>
+    </div>
+    <div class="demo-mockup">
+      <div class="demo-topbar">
+        <div class="demo-dot r"></div>
+        <div class="demo-dot y"></div>
+        <div class="demo-dot g"></div>
+      </div>
+      <div class="demo-content">
+        <div class="demo-sidebar">
+          <div style="padding:12px 20px;color:#fff;font-weight:700;font-size:14px;margin-bottom:8px;">&#128197; CalPush</div>
+          <div class="demo-sidebar-item active">&#128203; スケジュール</div>
+          <div class="demo-sidebar-item">&#128232; メール通知</div>
+          <div class="demo-sidebar-item">&#128197; 空き枠管理</div>
+          <div class="demo-sidebar-item">&#9881;&#65039; 設定</div>
+        </div>
+        <div class="demo-main">
+          <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+            <span style="background:#eef2ff;padding:4px 10px;border-radius:4px;font-size:12px;cursor:pointer;">&lt; 前週</span>
+            <span style="font-weight:600;font-size:14px;flex:1;text-align:center;">3/18(月) 〜 3/24(日)</span>
+            <span style="background:#eef2ff;padding:4px 10px;border-radius:4px;font-size:12px;cursor:pointer;">翌週 &gt;</span>
+            <span style="background:#4f46e5;color:#fff;padding:4px 10px;border-radius:4px;font-size:12px;">+ 予定追加</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+            <div>
+              <div style="text-align:center;font-size:11px;font-weight:600;padding:4px;background:#4f46e5;color:#fff;border-radius:4px;">3/18(月)</div>
+              <div class="demo-event" style="margin-top:6px;">10:00 定例MTG</div>
+              <div class="demo-event">14:00 1on1</div>
+            </div>
+            <div>
+              <div style="text-align:center;font-size:11px;font-weight:600;padding:4px;background:#f1f5f9;border-radius:4px;">3/19(火)</div>
+              <div class="demo-event tentative" style="margin-top:6px;">13:00 【仮】A社</div>
+            </div>
+            <div>
+              <div style="text-align:center;font-size:11px;font-weight:600;padding:4px;background:#f1f5f9;border-radius:4px;">3/20(水)</div>
+              <div class="demo-event" style="margin-top:6px;">09:00 朝会</div>
+              <div class="demo-event tentative">15:00 【仮】A社</div>
+            </div>
+            <div>
+              <div style="text-align:center;font-size:11px;font-weight:600;padding:4px;background:#f1f5f9;border-radius:4px;">3/21(木)</div>
+              <div class="demo-event" style="margin-top:6px;">11:00 レビュー会</div>
+            </div>
+            <div>
+              <div style="text-align:center;font-size:11px;font-weight:600;padding:4px;background:#f1f5f9;border-radius:4px;">3/22(金)</div>
+              <div class="demo-event" style="margin-top:6px;">10:00 企画会議</div>
+              <div class="demo-event">16:00 週次報告</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-label">COMPARISON</span>
+    <h2>他サービスとの比較</h2>
+    <p>CalPush は個人利用に最適なオープンソースの選択肢</p>
+  </div>
+  <table class="comparison-table">
+    <tr>
+      <th></th>
+      <th class="highlight-col">CalPush</th>
+      <th>L-STEP</th>
+      <th>Liny</th>
+    </tr>
+    <tr>
+      <td>月額料金</td>
+      <td class="highlight-col"><strong class="check">無料</strong></td>
+      <td>2,980円〜</td>
+      <td>5,000円〜</td>
+    </tr>
+    <tr>
+      <td>サーバー</td>
+      <td class="highlight-col"><strong class="check">不要</strong> (GAS)</td>
+      <td>不要</td>
+      <td>不要</td>
+    </tr>
+    <tr>
+      <td>カレンダー連携</td>
+      <td class="highlight-col"><span class="check">&#10003;</span> Google Calendar</td>
+      <td><span class="cross">&#10007;</span></td>
+      <td><span class="cross">&#10007;</span></td>
+    </tr>
+    <tr>
+      <td>メール通知</td>
+      <td class="highlight-col"><span class="check">&#10003;</span> Gmail連携</td>
+      <td><span class="cross">&#10007;</span></td>
+      <td><span class="cross">&#10007;</span></td>
+    </tr>
+    <tr>
+      <td>スケジュール管理画面</td>
+      <td class="highlight-col"><span class="check">&#10003;</span></td>
+      <td><span class="cross">&#10007;</span></td>
+      <td><span class="cross">&#10007;</span></td>
+    </tr>
+    <tr>
+      <td>ステップ配信</td>
+      <td class="highlight-col"><span class="cross">&#10007;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+    </tr>
+    <tr>
+      <td>セグメント配信</td>
+      <td class="highlight-col"><span class="cross">&#10007;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+    </tr>
+    <tr>
+      <td>対象ユーザー</td>
+      <td class="highlight-col"><strong>個人・小規模チーム</strong></td>
+      <td>ビジネス</td>
+      <td>ビジネス</td>
+    </tr>
+    <tr>
+      <td>ソースコード</td>
+      <td class="highlight-col"><span class="check">&#10003;</span> オープンソース</td>
+      <td><span class="cross">&#10007;</span></td>
+      <td><span class="cross">&#10007;</span></td>
+    </tr>
+  </table>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>今すぐ CalPush を始めよう</h2>
+  <p>5分のセットアップで、毎朝の予定確認を自動化。</p>
+  <a href="https://github.com/shimanto/calpush" class="btn-white">
+    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    GitHub で始める
+  </a>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="https://github.com/shimanto/calpush">GitHub</a>
+    <a href="https://github.com/shimanto/calpush/issues">Issues</a>
+    <a href="https://github.com/shimanto/calpush/blob/main/LICENSE">MIT License</a>
+  </div>
+  <p>&copy; 2026 CalPush &mdash; Open Source Schedule Notification Tool</p>
+</footer>
+
+</body>
+</html>
