@@ -152,6 +152,10 @@ export function dashboardPage(): string {
           <div class="value" id="calCount">0</div>
           <div class="label" id="calLabel">/ 1 カレンダー</div>
         </div>
+        <div class="plan-stat" id="planActions">
+          <button class="btn btn-sm" id="upgradeBtn" onclick="upgradePlan('pro')" style="display:none">Pro にアップグレード</button>
+          <button class="btn btn-outline btn-sm" id="portalBtn" onclick="openPortal()" style="display:none">プラン管理</button>
+        </div>
       </div>
     </div>
 
@@ -325,6 +329,14 @@ export function dashboardPage(): string {
         }
         document.getElementById('calCount').textContent = plan.usage.calendarCount;
         document.getElementById('calLabel').textContent = '/ ' + (plan.usage.calendarLimit === -1 ? '∞' : plan.usage.calendarLimit) + ' カレンダー';
+        // Show upgrade/portal buttons
+        if (plan.billingEnabled) {
+          if (plan.plan === 'free') {
+            document.getElementById('upgradeBtn').style.display = 'inline-block';
+          } else {
+            document.getElementById('portalBtn').style.display = 'inline-block';
+          }
+        }
         document.getElementById('planSection').style.display = 'block';
 
         // Calendars
@@ -616,6 +628,22 @@ export function dashboardPage(): string {
       if (!confirm('この操作は取り消せません。本当に削除しますか？')) return;
       await api('/account', 'DELETE');
       location.href = '/';
+    }
+
+    // --- Billing ---
+    async function upgradePlan(plan) {
+      var data = await fetch('/stripe/checkout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: plan }),
+      }).then(function(r) { return r.json(); });
+      if (data.url) location.href = data.url;
+      else alert(data.error || 'エラーが発生しました');
+    }
+
+    async function openPortal() {
+      var data = await fetch('/stripe/portal', { method: 'POST' }).then(function(r) { return r.json(); });
+      if (data.url) location.href = data.url;
+      else alert(data.error || 'エラーが発生しました');
     }
 
     // --- Utilities ---

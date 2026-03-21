@@ -16,4 +16,9 @@ export const env = {
   get SESSION_SECRET() { return required('SESSION_SECRET'); },
   get PORT() { return parseInt(optional('PORT', '3000'), 10); },
   get BASE_URL() { return optional('BASE_URL', 'http://localhost:3000'); },
+  // Stripe (optional for development, required for production billing)
+  get STRIPE_SECRET_KEY() { return optional('STRIPE_SECRET_KEY', ''); },
+  get STRIPE_WEBHOOK_SECRET() { return optional('STRIPE_WEBHOOK_SECRET', ''); },
+  get STRIPE_PRO_PRICE_ID() { return optional('STRIPE_PRO_PRICE_ID', ''); },
+  get STRIPE_BUSINESS_PRICE_ID() { return optional('STRIPE_BUSINESS_PRICE_ID', ''); },
 };

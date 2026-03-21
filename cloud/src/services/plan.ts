@@ -91,6 +91,9 @@ export async function getUserPlanInfo(userId: string) {
 
   return {
     plan: user.plan,
+    stripeSubStatus: user.stripeSubStatus,
+    planExpiresAt: user.planExpiresAt,
+    billingEnabled: !!process.env.STRIPE_SECRET_KEY,
     limits,
     usage: {
       pushCount: usage.pushCount,

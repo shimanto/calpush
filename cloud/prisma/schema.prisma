@@ -17,6 +17,10 @@ model User {
   googleRefreshToken String?
   googleTokenExpiry DateTime?
   plan              String   @default("free")
+  stripeCustomerId  String?  @unique
+  stripeSubId       String?
+  stripeSubStatus   String?
+  planExpiresAt     DateTime?
   notifyTime        String   @default("08:55")
   reminderMinutes   Int      @default(5)
   createdAt         DateTime @default(now())
