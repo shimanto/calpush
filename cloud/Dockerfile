@@ -31,6 +31,7 @@ COPY public ./public
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# DATABASE_URL is set via fly.toml or runtime env
 
 EXPOSE 3000
 
