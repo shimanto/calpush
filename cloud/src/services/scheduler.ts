@@ -1,6 +1,7 @@
 import { db } from '../lib/db.js';
 import { getEventsForDate, getUpcomingEvents, buildScheduleText } from './calendar.js';
 import { pushMessage } from './line.js';
+import { incrementPushCount } from './plan.js';
 
 // --- Daily Schedule Notification ---
 
@@ -13,10 +14,25 @@ export async function sendDailySchedules() {
   const today = new Date();
   let sent = 0;
   let errors = 0;
+  let limited = 0;
 
   for (const user of users) {
+    // Check user's preferred notify time (JST)
+    const [prefH, prefM] = (user.notifyTime || '08:55').split(':').map(Number);
+    const now = new Date();
+    const jstHour = (now.getUTCHours() + 9) % 24;
+    const jstMin = now.getMinutes();
+    if (jstHour !== prefH || jstMin !== prefM) continue;
+
     for (const channel of user.lineChannels) {
       try {
+        // Check plan limits
+        const { allowed } = await incrementPushCount(user.id);
+        if (!allowed) {
+          limited++;
+          continue;
+        }
+
         const events = await getEventsForDate(user.id, today);
         const text = buildScheduleText(events, today);
         await pushMessage(channel.id, channel.lineUserId!, text);
@@ -38,10 +54,10 @@ export async function sendDailySchedules() {
     }
   }
 
-  console.log(`[scheduler] daily schedules: sent=${sent}, errors=${errors}`);
+  console.log(`[scheduler] daily schedules: sent=${sent}, errors=${errors}, limited=${limited}`);
 }
 
-// --- Event Reminder (5 minutes before) ---
+// --- Event Reminder ---
 
 export async function sendEventReminders() {
   const users = await db.user.findMany({
@@ -54,15 +70,21 @@ export async function sendEventReminders() {
   for (const user of users) {
     if (user.lineChannels.length === 0) continue;
 
+    const reminderMin = user.reminderMinutes ?? 5;
+
     try {
-      // Events starting in the next 5-6 minutes
-      const events = await getUpcomingEvents(user.id, 6);
+      const events = await getUpcomingEvents(user.id, reminderMin + 1);
       const now = Date.now();
 
       for (const ev of events) {
         const diff = ev.start.getTime() - now;
-        // Only notify for events 4.5-6 minutes away (to avoid double-sending)
-        if (diff < 4.5 * 60 * 1000 || diff > 6 * 60 * 1000) continue;
+        const minMs = (reminderMin - 0.5) * 60 * 1000;
+        const maxMs = (reminderMin + 1) * 60 * 1000;
+        if (diff < minMs || diff > maxMs) continue;
+
+        // Check plan limits
+        const { allowed } = await incrementPushCount(user.id);
+        if (!allowed) continue;
 
         const hh = String(ev.start.getHours()).padStart(2, '0');
         const mm = String(ev.start.getMinutes()).padStart(2, '0');
@@ -98,14 +120,9 @@ let reminderTimer: ReturnType<typeof setInterval> | null = null;
 export function startScheduler() {
   console.log('[scheduler] starting...');
 
-  // Daily schedule: check every minute, send at ~08:55 JST
+  // Daily schedule: check every minute for each user's preferred time
   dailyTimer = setInterval(async () => {
-    const now = new Date();
-    const jstHour = (now.getUTCHours() + 9) % 24;
-    const jstMin = now.getMinutes();
-    if (jstHour === 8 && jstMin === 55) {
-      await sendDailySchedules();
-    }
+    await sendDailySchedules();
   }, 60 * 1000);
 
   // Reminder: check every minute
@@ -113,7 +130,7 @@ export function startScheduler() {
     await sendEventReminders();
   }, 60 * 1000);
 
-  console.log('[scheduler] started (daily=08:55 JST, reminders=every 1min)');
+  console.log('[scheduler] started (daily=per-user time, reminders=every 1min)');
 }
 
 export function stopScheduler() {

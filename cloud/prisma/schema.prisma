@@ -16,12 +16,16 @@ model User {
   googleAccessToken String?
   googleRefreshToken String?
   googleTokenExpiry DateTime?
+  plan              String   @default("free")
+  notifyTime        String   @default("08:55")
+  reminderMinutes   Int      @default(5)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   lineChannels      LineChannel[]
   calendars         CalendarLink[]
   notifications     Notification[]
+  usageRecords      UsageRecord[]
 }
 
 model LineChannel {
@@ -67,4 +71,15 @@ model Notification {
 
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   lineChannel   LineChannel @relation(fields: [lineChannelId], references: [id], onDelete: Cascade)
+}
+
+model UsageRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  month     String   // "2026-03" format
+  pushCount Int      @default(0)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
 }
