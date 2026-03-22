@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  googleId          String   @unique
+  email             String   @unique
+  name              String?
+  picture           String?
+  googleAccessToken String?
+  googleRefreshToken String?
+  googleTokenExpiry DateTime?
+  plan              String   @default("free")
+  stripeCustomerId  String?  @unique
+  stripeSubId       String?
+  stripeSubStatus   String?
+  planExpiresAt     DateTime?
+  notifyTime        String   @default("08:55")
+  reminderMinutes   Int      @default(5)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  lineChannels      LineChannel[]
+  calendars         CalendarLink[]
+  notifications     Notification[]
+  usageRecords      UsageRecord[]
+}
+
+model LineChannel {
+  id              String   @id @default(cuid())
+  userId          String
+  channelId       String
+  channelSecret   String
+  accessToken     String?
+  tokenExpiry     DateTime?
+  webhookActive   Boolean  @default(false)
+  lineUserId      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications   Notification[]
+
+  @@unique([userId, channelId])
+}
+
+model CalendarLink {
+  id          String   @id @default(cuid())
+  userId      String
+  calendarId  String
+  name        String?
+  color       String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, calendarId])
+}
+
+model Notification {
+  id            String   @id @default(cuid())
+  userId        String
+  lineChannelId String
+  type          String
+  title         String
+  body          String?
+  sentAt        DateTime @default(now())
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lineChannel   LineChannel @relation(fields: [lineChannelId], references: [id], onDelete: Cascade)
+}
+
+model UsageRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  month     String   // "2026-03" format
+  pushCount Int      @default(0)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
+}
