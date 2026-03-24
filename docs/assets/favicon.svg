@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#06C755" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg-grad)" />
+
+  <!-- Calendar mini icon (top-left area) -->
+  <rect x="10" y="14" width="24" height="22" rx="4" fill="#fff" opacity="0.95" />
+  <rect x="10" y="14" width="24" height="8" rx="4" fill="#fff" />
+  <rect x="10" y="20" width="24" height="2" fill="rgba(79,70,229,0.2)" />
+  <!-- Calendar pins -->
+  <rect x="16" y="11" width="3" height="6" rx="1.5" fill="#fff" />
+  <rect x="25" y="11" width="3" height="6" rx="1.5" fill="#fff" />
+  <!-- Calendar dots -->
+  <circle cx="17" cy="28" r="2" fill="#4f46e5" opacity="0.6" />
+  <circle cx="23" cy="28" r="2" fill="#4f46e5" opacity="0.4" />
+  <circle cx="29" cy="28" r="2" fill="#4f46e5" opacity="0.3" />
+
+  <!-- Arrow flowing right -->
+  <line x1="36" y1="28" x2="48" y2="28" stroke="#fff" stroke-width="3" stroke-linecap="round" />
+  <polyline points="44,22 50,28 44,34" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- LINE bubble (bottom-right) -->
+  <rect x="36" y="36" width="22" height="18" rx="6" fill="#fff" opacity="0.95" />
+  <polygon points="40,54 45,58 50,54" fill="#fff" opacity="0.95" />
+  <text x="41" y="51" font-family="'Segoe UI', -apple-system, sans-serif" font-size="14" font-weight="800" fill="#06C755">L</text>
+
+  <!-- Notification dot -->
+  <circle cx="56" cy="10" r="6" fill="#f59e0b" />
+</svg>
