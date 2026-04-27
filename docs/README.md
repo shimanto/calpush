@@ -1,11 +1,20 @@
 # CalPush - ドキュメント
 
+<p align="center">
+  <img src="assets/_overview-manga.png" alt="calpush プロジェクト概要漫画" width="320" />
+  <img src="assets/README-infographic.png" alt="CalPush - ドキュメント 図解" width="320" />
+</p>
+
+> 🖼️ 図解付きページ — 上が **プロジェクト概要漫画**、下が **このページ専用インフォグラフィック** です。
+
 📨 CalPush プロジェクトの全 **7 本** の Markdown ドキュメント集です。
 
 📱 本サイトはモバイル対応 (iPhone / Android / iPad)。
 🔗 GitHub: https://github.com/shimanto/calpush
 
 ---
+
+> 🖼️ = 図解付きページ (漫画 + インフォグラフィック)
 
 ## 📚 ドキュメント一覧
 
@@ -22,7 +31,7 @@
 
 ### 📘 docs/ 配下
 
-- [Pricing Model](pricing-model.md)
+- [🖼️ Pricing Model](pricing-model.md)
 
 ---
 

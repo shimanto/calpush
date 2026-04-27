@@ -1,5 +1,12 @@
 # CalPush 料金モデル設計書
 
+<p align="center">
+  <img src="assets/_overview-manga.png" alt="calpush プロジェクト概要漫画" width="320" />
+  <img src="assets/pricing-model-infographic.png" alt="CalPush 料金モデル設計書 図解" width="320" />
+</p>
+
+> 🖼️ 図解付きページ — 上が **プロジェクト概要漫画**、下が **このページ専用インフォグラフィック** です。
+
 ## 概要
 
 CalPushをフリープラン付きの有料SaaSとして展開するための料金モデル。

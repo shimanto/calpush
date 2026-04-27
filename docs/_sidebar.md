@@ -1,4 +1,6 @@
-- [🏠 ホーム / 目次](README.md)
+> 🖼️ = 図解付きページ (漫画 + インフォグラフィック)
+
+- [🖼️ 🏠 ホーム / 目次](README.md)
 
 - **🏁 プロジェクト全体**
   - [Bug Report](https://github.com/shimanto/calpush/blob/HEAD/.github/ISSUE_TEMPLATE/bug_report.md)
@@ -9,7 +11,7 @@
   - [Setup Manual](https://github.com/shimanto/calpush/blob/HEAD/setup-manual.md)
 
 - **📚 ドキュメント**
-  - [Pricing Model](pricing-model.md)
+  - [🖼️ Pricing Model](pricing-model.md)
 
 - **🔗 外部**
   - [📘 GitHub](https://github.com/shimanto/calpush)
