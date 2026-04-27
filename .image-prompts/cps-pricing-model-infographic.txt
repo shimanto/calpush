@@ -1,0 +1,62 @@
+A vertical 9:16 portrait infographic poster titled "CalPush 料金モデル設計書", flat-design Japanese style, NO characters.
+
+=== STYLE ===
+Flat-design Japanese infographic. Bold 2px outlines. Color: light teal (#5DDFD5) primary + LINE green (#06C755) accent, white & light gray bg, dark slate text. Smartphone-readable.
+
+=== LAYOUT ===
+
+[Header — 10%]
+- Title: 「CalPush 料金モデル」
+- Subtitle: 「OSS は無料維持 / マネージド版 = フリーミアム SaaS」
+- Pricing tag icon.
+
+[Section 1 — "ビジネスモデル方針", ~14%]
+- Two cards side by side:
+  - 🆓 OSS セルフホスト → MIT License で無料維持 (GAS デプロイ)
+  - ☁️ CalPush Cloud → ホスティング版・フリーミアム SaaS
+
+[Section 2 — "3 プラン比較 (3-Plan Comparison)", ~46%]
+- 3 vertical pricing column cards (Free / Pro / Business) with checkmarks:
+
+  Free — ¥0/月
+  - カレンダー: 1
+  - LINE 通知: 200/月
+  - 朝の通知 / 5 分前リマインダー: ✅
+  - Gmail 転送: 3 ドメイン
+  - 仮予約: 5/月
+  - 空き時間検索: 当日〜3 日
+  - データ保持: 30 日
+  - サポート: コミュニティ
+
+  Pro — ¥480/月 (年 ¥3,980)
+  - カレンダー: 5
+  - LINE 通知: 無制限
+  - Gmail 転送: 無制限
+  - 仮予約: 50/月
+  - 空き時間検索: 当日〜30 日
+  - データ保持: 1 年
+  - サポート: メール 24h
+
+  Business — ¥1,980/月
+  - カレンダー: 無制限
+  - チームメンバー: 5 名
+  - 共有予約管理
+  - 仮予約: 無制限
+  - データ保持: 無期限
+  - サポート: 専任 8h
+  - SLA 保証
+
+[Section 3 — "ターゲット & 狙い (Targets)", ~18%]
+- 3 target chips:
+  - 個人 (Free) → OSS 同等のフリー利用
+  - フリーランス・個人事業主 (Pro) → 案件管理・空き時間共有
+  - 中小企業・チーム (Business) → 共有予約・SLA 必要
+
+[Footer — ~12%]
+- Pills:
+  - 📊 詳細: docs/pricing-model.md
+  - 🌐 calpush-docs.pages.dev
+  - 💬 フィードバック歓迎 (GitHub Issues)
+
+=== TECHNICAL CONSTRAINTS ===
+- 9:16 vertical portrait. All Japanese accurate. Match overview manga teal palette.

@@ -1,0 +1,38 @@
+A vertical 9:16 portrait 4-panel manga page in Crayon Shin-chan (クレヨンしんちゃん) art style.
+
+=== STYLE (must match attached character model sheet) ===
+Bold thick black outlines, flat fills. Round bean-shaped heads, dot eyes. 1:3 chibi. Pink blush. Color: light teal/aqua (#5DDFD5) + LINE green (#06C755) accent, white & light gray, dark slate outlines.
+
+=== CHARACTERS ===
+ミドリ (29歳, female): brown bob, teal dot blouse with white collar.
+タツヤ (30歳, male): short dark hair, gray-blue shirt.
+IDENTICAL appearance across all 4 panels.
+
+=== STORYLINE ===
+
+Panel 1 — TITLE: 「Google カレンダーと Gmail と LINE…」
+- ミドリ at her desk overwhelmed: 3 device icons floating around her — laptop with Google Calendar, smartphone with Gmail, smartphone with LINE — and arrows in chaos. Big sweat drop. Speech bubble: 「全部別々で見るの大変ー！」
+- タツヤ next to her with thoughtful 「うーん…」 expression.
+- Caption: 「3 つのサービスをぐるぐる切り替え…」
+
+Panel 2 — TITLE: 「CalPush で 1 つに統合！」
+- A clean unified diagram: Google Calendar icon + Gmail icon + GAS gear icon → arrow → LINE chat bubble icon. The three icons merge into a single "CalPush" hub.
+- ミドリ's face brightens with sparkle eyes 「ピーン！」 lightbulb.
+- Caption: 「Google Apps Script だけで完結。サーバー不要、無料」
+
+Panel 3 — TITLE: 「LINE で全部完了」
+- A smartphone center showing LINE messages stack:
+  - 「📅 今日の予定 (3件)」 朝会・打合せ・振り返り
+  - 「⏰ 5 分前リマインダー」
+  - 「📨 重要メール: ○○様より見積依頼」
+  - 「💬 ＋追加: 14:00 デモ」
+- ミドリ smiles holding the phone, タツヤ also peeking at it nodding 「便利！」.
+- Caption: 「予定通知 / リマインダー / メール転送 / チャットで予定追加 — 全部 LINE で」
+
+Panel 4 — TITLE: 「2 つの情報入力で 5 分セットアップ」
+- A wizard-style screen showing 2 input fields: 「LINE チャネルアクセストークン」 and 「Google Calendar ID」, with a big teal 「セットアップ完了」 button.
+- Both characters celebrating with raised hands. ミドリ: 「やったー！」 タツヤ: 「OSS 最高！」.
+- Caption: 「clasp push で GAS にデプロイ。LINE × Calendar × Gmail を 5 分で連携。」
+
+=== TECHNICAL CONSTRAINTS ===
+- 9:16 vertical portrait. All Japanese accurate. 4 panels stacked. Identical character appearance.

@@ -1,8 +1,8 @@
 # CalPush - ドキュメント
 
 <p align="center">
-  <img src="assets/_overview-manga.png" alt="calpush プロジェクト概要漫画" width="320" />
-  <img src="assets/README-infographic.png" alt="CalPush - ドキュメント 図解" width="320" />
+  <img src="assets/cps-overview-manga.png" alt="calpush プロジェクト概要漫画" width="320" />
+  <img src="assets/cps-README-infographic.png" alt="CalPush - ドキュメント 図解" width="320" />
 </p>
 
 > 🖼️ 図解付きページ — 上が **プロジェクト概要漫画**、下が **このページ専用インフォグラフィック** です。
